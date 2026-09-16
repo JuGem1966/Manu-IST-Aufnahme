@@ -328,13 +328,20 @@
       repo: config.repo || '',
       branch: config.branch || 'main',
       folder: config.folder || 'daten',
-      token: config.token || ''
+      token: config.token || '',
+      timeoutMs: config.timeoutMs === undefined ? 20000 : config.timeoutMs
     };
 
+    /* Kopfzeilen einer Anfrage - bewusst OHNE X-GitHub-Api-Version.
+       GitHub laesst diese Kopfzeile in der CORS-Vorabanfrage nicht zu:
+       Access-Control-Allow-Headers erlaubt nur Authorization, Content-Type,
+       If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since und
+       X-Requested-With. Im Browser wird die Anfrage deshalb blockiert,
+       waehrend curl und Node anstandslos funktionieren - ein Fehler, den
+       ein Test ohne Browser nicht bemerkt. */
     function headers(extra) {
       var h = {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28'
+        'Accept': 'application/vnd.github+json'
       };
       if (cfg.token && isTrustedHost(cfg.apiBase)) { h['Authorization'] = 'Bearer ' + cfg.token; }
       if (extra) { for (var k in extra) { if (extra.hasOwnProperty(k)) { h[k] = extra[k]; } } }
@@ -355,24 +362,59 @@
       return u;
     }
 
-    /* Fuehrt eine Anfrage aus und normalisiert Fehler zu einem Ergebnisobjekt. */
+    /* Fuehrt eine Anfrage aus und normalisiert Fehler zu einem Ergebnisobjekt.
+       Jede Anfrage hat eine harte Zeitgrenze: ohne sie bliebe die Anzeige bei
+       einer haengenden Verbindung fuer immer auf "laeuft..." stehen. Der
+       Wettlauf gegen die Uhr greift unabhaengig davon, ob die jeweilige
+       fetch-Umsetzung das Abbruchsignal beachtet. */
     function request(method, fullUrl, body) {
       if (!doFetch) { return Promise.resolve({ ok: false, status: 0, error: 'keine_fetch_funktion' }); }
       var opts = { method: method, headers: headers(body ? { 'Content-Type': 'application/json' } : null) };
       if (body) { opts.body = JSON.stringify(body); }
-      return doFetch(fullUrl, opts).then(function (res) {
+
+      var timeoutMs = Number(cfg.timeoutMs || 20000);
+      var timer = null;
+      var controller = null;
+      if (timeoutMs > 0 && typeof AbortController !== 'undefined') {
+        controller = new AbortController();
+        opts.signal = controller.signal;
+      }
+
+      var work = doFetch(fullUrl, opts).then(function (res) {
         return res.text().then(function (text) {
           var data = null;
           if (text) { try { data = JSON.parse(text); } catch (e) { data = { raw: text }; } }
           return { ok: res.ok, status: res.status, data: data };
         });
       }).catch(function (err) {
-        return { ok: false, status: 0, error: String((err && err.message) || err) };
+        var isAbort = !!(err && (err.name === 'AbortError' || String(err).indexOf('abort') >= 0));
+        return { ok: false, status: 0, aborted: isAbort, error: String((err && err.message) || err) };
+      });
+
+      if (!(timeoutMs > 0)) { return work; }
+
+      var limit = new Promise(function (resolve) {
+        timer = setTimeout(function () {
+          if (controller) { try { controller.abort(); } catch (e) {} }
+          resolve({ ok: false, status: 0, aborted: true, error: 'timeout' });
+        }, timeoutMs);
+      });
+
+      return Promise.race([work, limit]).then(function (r) {
+        if (timer) { clearTimeout(timer); }
+        return r;
       });
     }
 
     function explain(result) {
-      if (result.status === 0) { return 'Netzwerk- oder CORS-Fehler: ' + (result.error || 'unbekannt'); }
+      if (result.status === 0) {
+        if (result.aborted) {
+          var sec = Number(cfg.timeoutMs || 20000) / 1000;
+          var secText = sec >= 10 ? String(Math.round(sec)) : String(Math.round(sec * 10) / 10);
+          return 'Zeitueberschreitung: keine Antwort innerhalb von ' + secText + ' Sekunden. Bitte Internetverbindung, Firewall oder Proxy pruefen.';
+        }
+        return 'Keine Antwort erhalten (' + (result.error || 'unbekannt') + '). Typische Ursachen: kein Internet, eine Firewall oder ein Proxy im Weg, oder der Browser hat die Anfrage wegen CORS blockiert.';
+      }
       if (result.status === 401) { return 'Token ungueltig oder abgelaufen (401).'; }
       if (result.status === 403) { return 'Zugriff verweigert (403). Fehlt die Berechtigung Contents: read/write?'; }
       if (result.status === 404) { return 'Repository oder Pfad nicht gefunden (404). Schreibweise von Eigentuemer und Repository pruefen und ob das Token dieses Repository einschliesst.'; }
@@ -390,7 +432,7 @@
       /* Verbindung und Rechte pruefen. */
       check: function () {
         return request('GET', url('')).then(function (r) {
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           var d = r.data || {};
           return {
             ok: true,
@@ -406,7 +448,7 @@
       list: function () {
         return request('GET', url('/contents/' + encodeURIComponent(cfg.folder).replace(/%2F/g, '/'), { ref: cfg.branch })).then(function (r) {
           if (r.status === 404) { return { ok: true, files: [] }; }
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           if (!Array.isArray(r.data)) { return { ok: true, files: [] }; }
           var files = r.data.filter(function (e) { return e.type === 'file' && /\.json$/i.test(e.name); })
             .map(function (e) { return { name: e.name, path: e.path, sha: e.sha, size: e.size }; });
@@ -418,7 +460,7 @@
       read: function (path) {
         return request('GET', url('/contents/' + path.split('/').map(encodeURIComponent).join('/'), { ref: cfg.branch })).then(function (r) {
           if (r.status === 404) { return { ok: false, status: 404, missing: true, message: 'noch nicht vorhanden' }; }
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           var d = r.data || {};
           try {
             var json = JSON.parse(fromBase64(d.content));
@@ -442,7 +484,7 @@
           if (r.status === 409) {
             return { ok: false, conflict: true, status: 409, message: explain(r) };
           }
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           var d = r.data || {};
           return {
             ok: true,
@@ -461,7 +503,7 @@
           sha: sha,
           branch: cfg.branch
         }).then(function (r) {
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           return { ok: true, status: r.status };
         });
       },
@@ -470,7 +512,7 @@
       history: function (path, limit) {
         return request('GET', url('/commits', { path: path, sha: cfg.branch, per_page: limit || 15 })).then(function (r) {
           if (r.status === 404 || r.status === 409) { return { ok: true, commits: [] }; }
-          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!r.ok) { return { ok: false, status: r.status, aborted: r.aborted, message: explain(r) }; }
           if (!Array.isArray(r.data)) { return { ok: true, commits: [] }; }
           var commits = r.data.map(function (c) {
             return {
@@ -662,7 +704,9 @@
     log: [],
     history: null,
     selftest: null,
-    busy: false
+    diagnose: null,
+    busy: false,
+    busyAction: ''
   };
 
   var runtime = { demoFetch: null, timer: null, mounted: false };
@@ -680,8 +724,10 @@
       }
     } catch (e) { /* beschaedigter Eintrag wird ignoriert */ }
     syncState.busy = false;
+    syncState.busyAction = '';
     syncState.history = null;
     syncState.selftest = null;
+    syncState.diagnose = null;
   }
 
   function saveState() {
@@ -720,7 +766,8 @@
       repo: (syncState.repo || '').trim(),
       branch: (syncState.branch || 'main').trim(),
       folder: (syncState.folder || 'daten').trim(),
-      token: (syncState.token || '').trim()
+      token: (syncState.token || '').trim(),
+      timeoutMs: 20000
     };
   }
 
@@ -825,9 +872,9 @@
       render(); saveState(); return Promise.resolve();
     }
     log('Verbindung pruefen: ' + syncState.owner + '/' + syncState.repo + ' (' + (syncState.demo ? 'Demo' : syncState.apiBase) + ')', 'info');
-    syncState.busy = true; render();
+    syncState.busy = true; syncState.busyAction = 'check'; render();
     return getEngine(syncState.demo).check().then(function (r) {
-      syncState.busy = false;
+      syncState.busy = false; syncState.busyAction = '';
       if (r.ok) {
         syncState.configured = true;
         log('Verbindung steht: ' + r.fullName + ', privat=' + (r.isPrivate ? 'ja' : 'nein') + ', Standardbranch ' + r.defaultBranch, 'ok');
@@ -907,7 +954,7 @@
       log('Bitte zuerst die Verbindung pruefen.', 'warn');
       render(); return Promise.resolve();
     }
-    syncState.busy = true;
+    syncState.busy = true; syncState.busyAction = 'sync';
     log('Synchronisation gestartet (' + state.apps.length + ' Anwendung(en)).', 'info');
     render();
     var eng = getEngine(syncState.demo);
@@ -933,10 +980,79 @@
         syncState.lastSync = new Date().toISOString();
         var msg = 'Synchronisation fertig: ' + state.apps.length + ' Anwendung(en), ' + hoch + ' offen' + (konf ? ', ' + konf + ' Konflikt(e)' : '') + '.';
         log(msg, konf ? 'warn' : 'ok');
-        syncState.busy = false;
+        syncState.busy = false; syncState.busyAction = '';
         render(); saveState();
         if (window.render) { window.render(); }
       });
+    });
+  }
+
+  /* Schrittweise Diagnose: benennt genau die Stelle, an der es hapert. */
+  function diagnose() {
+    var steps = [];
+    var cfg = engineConfig();
+    syncState.diagnose = { steps: steps, at: new Date().toISOString(), done: false };
+    syncState.busy = true; syncState.busyAction = 'diagnose';
+    log('Diagnose gestartet.', 'info');
+    render();
+
+    function add(name, state, detail) {
+      steps.push({ name: name, state: state, detail: detail || '' });
+      render();
+    }
+
+    var probs = [];
+    if (!cfg.owner) { probs.push('Eigentuemer fehlt'); }
+    if (!cfg.repo) { probs.push('Repository fehlt'); }
+    if (!syncState.demo && !cfg.token) { probs.push('Token fehlt'); }
+    if (cfg.owner && !/^[A-Za-z0-9._-]+$/.test(cfg.owner)) { probs.push('Eigentuemer enthaelt ungewoehnliche Zeichen: ' + cfg.owner); }
+    if (cfg.repo && !/^[A-Za-z0-9._-]+$/.test(cfg.repo)) { probs.push('Repository enthaelt ungewoehnliche Zeichen: ' + cfg.repo); }
+    add('Eingaben', probs.length ? 'bad' : 'ok', probs.length ? probs.join('; ') :
+      'Eigentuemer ' + cfg.owner + ', Repository ' + cfg.repo + ', Ordner ' + cfg.folder + ', Branch ' + cfg.branch + ', ' +
+      (syncState.demo ? 'Demo-Modus (kein GitHub noetig)' : (cfg.token ? 'Token vorhanden, ' + cfg.token.length + ' Zeichen' : 'kein Token')));
+
+    var eng = getEngine(syncState.demo);
+    return eng.check().then(function (r) {
+      add('Zugriff auf das Repository', r.ok ? 'ok' : 'bad', r.ok
+        ? 'Verbunden mit ' + r.fullName + ' (privat: ' + (r.isPrivate ? 'ja' : 'nein') + ', Standardbranch ' + (r.defaultBranch || 'unbekannt') + ')'
+        : r.message);
+      if (!r.ok) { return null; }
+      return eng.list().then(function (l) {
+        add('Datenordner lesen', l.ok ? 'ok' : 'bad', l.ok
+          ? (l.files.length ? l.files.length + ' Datei(en) gefunden: ' + l.files.map(function (f) { return f.name; }).slice(0, 8).join(', ')
+                            : 'Der Ordner ist leer oder noch nicht vorhanden. Er wird beim ersten Speichern angelegt.')
+          : l.message);
+      });
+    }).then(function () {
+      if (steps.length && steps[steps.length - 1].name === 'Zugriff auf das Repository' && steps[steps.length - 1].state === 'bad') { return null; }
+      var probePath = window.SyncEngine.buildPath(cfg.folder, '_diagnose-probe');
+      var probe = { schema: 'ist-aufnahme-neuhaus/diagnose', at: new Date().toISOString(), hinweis: 'Diese Datei legt die Diagnose an und entfernt sie sofort wieder.' };
+      return eng.write(probePath, probe, null, 'Diagnose: Schreibtest (wird sofort entfernt)').then(function (w) {
+        if (!w.ok) {
+          var extra = (w.status === 403) ? ' Die Token-Berechtigung muss Contents auf Read and write setzen und dieses Repository einschliessen.' : '';
+          add('Schreibtest', 'bad', w.message + extra);
+          return null;
+        }
+        add('Schreibtest', 'ok', 'Probedatei angelegt: ' + probePath);
+        return eng.remove(probePath, w.sha, 'Diagnose: Probedatei entfernen').then(function (d) {
+          add('Probedatei entfernen', d.ok ? 'ok' : 'warn', d.ok ? 'Probedatei wieder entfernt. Im Verlauf bleiben zwei Eintraege der Diagnose.' : d.message);
+        });
+      });
+    }).then(function () {
+      var bad = steps.filter(function (x) { return x.state === 'bad'; }).length;
+      syncState.diagnose.done = true;
+      syncState.diagnose.summary = bad
+        ? 'Die Diagnose hat ' + bad + ' Punkt(e) gefunden, die zu klaeren sind. Die Einzelheiten stehen oben.'
+        : 'Alle Pruefungen bestanden. Die Synchronisation sollte arbeiten.';
+      log('Diagnose fertig: ' + (bad ? bad + ' Punkt(e) zu klaeren.' : 'alles bestanden.'), bad ? 'bad' : 'ok');
+      syncState.busy = false; syncState.busyAction = '';
+      render(); saveState();
+    }).catch(function (err) {
+      add('Diagnose abgebrochen', 'bad', String(err));
+      syncState.diagnose.done = true;
+      syncState.diagnose.summary = 'Die Diagnose konnte nicht zu Ende laufen.';
+      syncState.busy = false; syncState.busyAction = '';
+      render();
     });
   }
 
@@ -1110,12 +1226,14 @@
     }
 
     h += '<div class="sync-row" style="margin-top:0.8rem;">' +
-      '<button class="btn btn-primary" data-act="check">Verbindung pruefen</button>' +
-      '<button class="btn btn-primary" data-act="sync"' + (syncState.busy ? ' disabled' : '') + '>' + (syncState.busy ? 'laeuft...' : 'Jetzt synchronisieren') + '</button>' +
+      btn('check', 'Verbindung pruefen', 'btn-primary') +
+      btn('sync', 'Jetzt synchronisieren', 'btn-primary') +
+      btn('diagnose', 'Diagnose', 'btn-secondary') +
       '<button class="btn btn-secondary" data-act="pull-all">Alles neu laden</button>' +
       '<button class="btn btn-secondary" data-act="token-clear">Token loeschen</button>' +
       '<button class="btn btn-secondary" data-act="selftest">Selbsttest</button>' +
-      '</div>';
+      '</div>' +
+      '<p class="status-bar" style="margin-top:0.5rem;">Der Knopf Diagnose prueft Schritt fuer Schritt und schreibt die Ergebnisse unten auf. Er ist der erste Weg, wenn etwas nicht klappt.</p>';
 
     h += '<p class="status-bar" style="margin-top:0.7rem;">' + (syncState.configured ? 'Verbindung eingerichtet' : 'Noch nicht verbunden') +
       ' &middot; letzte Synchronisation: ' + fmt(syncState.lastSync) +
@@ -1177,6 +1295,23 @@
       h += '<div style="margin-top:0.6rem;"><button class="btn btn-secondary btn-sm" data-act="history-close">Verlauf schliessen</button></div></div>';
     }
 
+    /* Diagnose */
+    if (syncState.diagnose) {
+      var dg = syncState.diagnose;
+      h += '<div class="card"><h2>Diagnose</h2><p class="intro">Prueft die Verbindung Schritt fuer Schritt und benennt die Stelle, an der es hapert. Ausgefuehrt am ' + fmt(dg.at) + '.</p>';
+      h += '<table class="matrix"><tbody>';
+      dg.steps.forEach(function (s) {
+        var cls = s.state === 'ok' ? 'ok' : (s.state === 'bad' ? 'konflikt' : 'ausstehend');
+        var lbl = s.state === 'ok' ? 'OK' : (s.state === 'bad' ? 'PROBLEM' : 'HINWEIS');
+        h += '<tr><td style="width:6rem;"><span class="sync-badge ' + cls + '">' + lbl + '</span></td>' +
+          '<td style="width:14rem;"><strong>' + escapeHtml(s.name) + '</strong></td><td>' + escapeHtml(s.detail) + '</td></tr>';
+      });
+      h += '</tbody></table>';
+      if (!dg.done) { h += '<p class="status-bar" style="margin-top:0.6rem;">laeuft...</p>'; }
+      else if (dg.summary) { h += '<p class="status-bar" style="margin-top:0.6rem;">' + escapeHtml(dg.summary) + '</p>'; }
+      h += '<div style="margin-top:0.6rem;"><button class="btn btn-secondary btn-sm" data-act="diagnose-close">Diagnose schliessen</button></div></div>';
+    }
+
     /* Selbsttest */
     if (syncState.selftest) {
       var st2 = syncState.selftest;
@@ -1203,6 +1338,14 @@
 
     host.innerHTML = h;
     refreshPill();
+  }
+
+  /* Knopfbeschriftung und Sperrzustand: der gedrueckte Knopf zeigt laeuft...,
+     die uebrigen sind waehrend eines laufenden Vorgangs gesperrt. */
+  function btn(act, text, cls) {
+    var busy = syncState.busy && syncState.busyAction === act;
+    return '<button class="btn ' + cls + '" data-act="' + act + '"' + (syncState.busy ? ' disabled' : '') + '>' +
+      (busy ? 'laeuft...' : text) + '</button>';
   }
 
   function field(key, label, value, hint) {
@@ -1241,6 +1384,8 @@
     else if (act === 'take-remote') { resolveConflict(id, true); }
     else if (act === 'force-local') { resolveConflict(id, false); }
     else if (act === 'selftest') { selftest(); }
+    else if (act === 'diagnose') { diagnose(); }
+    else if (act === 'diagnose-close') { syncState.diagnose = null; render(); }
     else if (act === 'selftest-close') { syncState.selftest = null; render(); }
     else if (act === 'token-clear') { syncState.token = ''; syncState.configured = false; saveState(); log('Token geloescht.', 'info'); render(); }
     else if (act === 'demo-reset') {

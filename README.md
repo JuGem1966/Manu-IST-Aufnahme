@@ -1,4 +1,4 @@
-# IST-Aufnahme der Anwendungen – Neuhaus Wohn- und Pflegezentrum Wängi
+# IST-Aufnahme der Anwendungen - Neuhaus Wohn- und Pflegezentrum Wängi
 
 Instrument zur IST-Aufnahme der Anwendungslandschaft, zugeschnitten auf ein Wohn- und
 Pflegezentrum. Trägerin: Stiftung Neuhaus, Wängi.
@@ -16,7 +16,7 @@ keine Anmeldung.
 | `.nojekyll` | Leere Datei. Verhindert, dass GitHub Pages die Dateien durch Jekyll verarbeitet. |
 
 **Diese Datei (`README.md`) ist optional.** GitHub Pages würde sie als Startseite verwenden,
-wenn keine `index.html` vorhanden wäre. Da `index.html` existiert, hat sie Vorrang — die
+wenn keine `index.html` vorhanden wäre. Da `index.html` existiert, hat sie Vorrang - die
 README wird nur im Repository angezeigt, nicht als Website.
 
 ---
@@ -27,7 +27,7 @@ README wird nur im Repository angezeigt, nicht als Website.
 
 Auf GitHub ein neues Repository anlegen, zum Beispiel `ist-aufnahme-neuhaus`.
 
-Bei einem kostenlosen Konto **muss das Repository öffentlich sein** — GitHub Pages lässt sich
+Bei einem kostenlosen Konto **muss das Repository öffentlich sein** - GitHub Pages lässt sich
 am Gratis-Konto nur aus öffentlichen Repositories veröffentlichen. Private Repositories sind
 zwar unbegrenzt kostenlos, aber ohne Pages.
 
@@ -43,14 +43,13 @@ Zu beachten:
 
 - Der Dateiname muss **exakt klein** geschrieben sein: `index.html`. `Index.html` funktioniert nicht.
 - Beide Dateien gehören auf die oberste Ebene, nicht in einen Unterordner.
-- Die versteckte Datei `.nojekyll` wird von GitHub akzeptiert; beim Hochladen über die
-  Weboberfläche einfach als Dateinamen `​.nojekyll` eingeben.
+- Beim Hochladen über die Weboberfläche die versteckte Datei als `.nojekyll` eingeben.
 
 ### 3. GitHub Pages einschalten
 
 1. Im Repository auf **Settings**
 2. Im Seitenmenü auf **Pages**
-3. Unter *Build and deployment* → *Source*: **Deploy from a branch**
+3. Unter *Build and deployment* / *Source*: **Deploy from a branch**
 4. Branch **main**, Ordner **/(root)** wählen
 5. **Save** klicken
 
@@ -62,7 +61,7 @@ Nach etwa einer Minute bis zu zehn Minuten ist die Seite erreichbar unter:
 https://<benutzername>.github.io/<repository-name>/
 ```
 
-Den Link finden Sie jederzeit unter *Settings → Pages → Visit site*.
+Den Link finden Sie jederzeit unter *Settings / Pages / Visit site*.
 
 ---
 
@@ -80,18 +79,18 @@ Alles verhält sich wie im Echtbetrieb, der Speicher liegt aber nur im Browser.
 
 ### Dann auf GitHub umstellen
 
-**a) Daten-Repository anlegen** — ein **zweites, privates** Repository, nur für Daten.
+**a) Daten-Repository anlegen** - ein **zweites, privates** Repository, nur für Daten.
 Nicht dasselbe Repository wie die App, sonst wären die Erfassungsbögen öffentlich abrufbar.
 
 **b) Token erzeugen**
 
-GitHub → *Settings* (des eigenen Kontos) → *Developer settings* → *Personal access tokens*
-→ *Fine-grained tokens* → *Generate new token*:
+GitHub / *Settings* (des eigenen Kontos) / *Developer settings* / *Personal access tokens*
+/ *Fine-grained tokens* / *Generate new token*:
 
 | Einstellung | Wert |
 |---|---|
-| Repository access | **Only select repositories** → das Daten-Repository |
-| Permissions → Repository permissions → **Contents** | **Read and write** |
+| Repository access | **Only select repositories** / das Daten-Repository |
+| Permissions / Repository permissions / **Contents** | **Read and write** |
 | Expiration | nach Wahl, zum Beispiel 90 Tage |
 
 Nichts anderes aktivieren. Das Token gilt dann für genau ein Repository.
@@ -107,7 +106,7 @@ Nichts anderes aktivieren. Das Token gilt dann für genau ein Repository.
 | API-Adresse | `https://api.github.com` |
 | Token | das eben erzeugte Token |
 
-Danach **Verbindung prüfen**. Meldet die App *«Verbindung steht»*, ist alles bereit.
+Danach **Verbindung prüfen**. Meldet die App *Verbindung steht*, ist alles bereit.
 
 **d) Demo-Häkchen entfernen**, damit gegen GitHub gearbeitet wird.
 
@@ -131,23 +130,52 @@ Die Verbindungsdaten stehen **nicht** in der Datei, sondern im Browser-Speicher.
 |---|---|
 | Erfassen | Reiter **Erfassung je Anwendung**, Abschnitte 1 bis 9 |
 | Auswerten und filtern | Reiter **Übersicht und Auswertung** |
-| Übertragen | Reiter **Synchronisation** — automatisch 2,5 Sekunden nach der letzten Änderung, oder auf Knopfdruck |
-| Zustand prüfen | Anzeige **Sync: …** oben rechts, dazu das Protokoll |
-| Bericht erzeugen | Knopf **Drucken / PDF** — ergibt einen sauberen Ausdruck des aktuellen Bogens |
-| Datensicherung | Knopf **Speichern** — JSON-Datei; **Laden** liest sie wieder ein |
-| Weitergabe / Auswertung in Excel | **Export CSV** bzw. **Matrix als CSV** |
+| Übertragen | Reiter **Synchronisation** - automatisch 2,5 Sekunden nach der letzten Änderung, oder auf Knopfdruck |
+| Zustand prüfen | Anzeige **Sync** oben rechts, dazu das Protokoll |
+| Bericht erzeugen | Knopf **Drucken / PDF** - ergibt einen sauberen Ausdruck des aktuellen Bogens |
+| Datensicherung | Knopf **Speichern** - JSON-Datei; **Laden** liest sie wieder ein |
+| Auswertung in Excel | **Export CSV** beziehungsweise **Matrix als CSV** |
 
 ### Wenn ein Konflikt gemeldet wird
 
 Das bedeutet: Im Repository liegt eine neuere Fassung, als dieser Rechner kennt. Die App
 zeigt den Konflikt rot an und bietet zwei Wege:
 
-- **Fremde Fassung übernehmen** — die andere Version gilt.
-- **Meine Fassung durchsetzen** — die eigene Version wird hochgeladen und überschreibt die andere.
+- **Fremde Fassung übernehmen** - die andere Version gilt.
+- **Meine Fassung durchsetzen** - die eigene Version wird hochgeladen und überschreibt die andere.
 
 Nichts geht dabei verloren: Die überschriebene Fassung bleibt im Verlauf des Repositories
 erhalten und lässt sich dort wiederherstellen. Bei zwei Personen mit getrennten Bögen
 entsteht ein Konflikt praktisch nie.
+
+---
+
+## Wenn etwas nicht klappt
+
+Die Anwendung hat dafür einen eigenen Knopf: **Synchronisation / Diagnose**. Er prüft der Reihe
+nach und schreibt das Ergebnis jeder Stufe untereinander auf:
+
+| Schritt | Was geprüft wird |
+|---|---|
+| Eingaben | Eigentümer, Repository, Ordner, Branch, Token - auf Vorhandensein und Schreibweise |
+| Zugriff auf das Repository | Verbindung, Sichtbarkeit (privat/öffentlich), Standardbranch |
+| Datenordner lesen | Ob der Ordner erreichbar ist und was darin liegt |
+| Schreibtest | Ob die App schreiben darf - sie legt eine Probedatei an und entfernt sie sofort wieder |
+| Probedatei entfernen | Ob auch das Löschen gelingt |
+
+Jede Zeile bekommt **OK**, **PROBLEM** oder **HINWEIS**. Steht bei einem Schritt PROBLEM, ist die
+Ursache dort benannt - meist fehlt die Berechtigung *Contents: Read and write* am Token, oder
+das Token schliesst das Daten-Repository nicht ein.
+
+| Beobachtung | Ursache | Abhilfe |
+|---|---|---|
+| Der Knopf bleibt auf *laeuft...* stehen | Die Verbindung antwortet nicht | Nach 20 Sekunden bricht die Anwendung von selbst ab und meldet eine Zeitüberschreitung. Danach den Diagnose-Knopf nutzen |
+| *Keine Antwort erhalten* | Kein Internet, eine Firewall oder ein Proxy im Weg | Prüfen, ob `https://api.github.com` im Browser erreichbar ist |
+| *Zugriff verweigert (403)* | Token-Berechtigung fehlt | Beim Token *Contents: Read and write* setzen |
+| *Repository oder Pfad nicht gefunden (404)* | Schreibweise, oder das Token schliesst dieses Repository nicht ein | Eigentümer und Repository genau prüfen |
+
+Der Schreibtest legt im Daten-Repository zwei Commit-Einträge an (anlegen und entfernen). Das
+ist unbedenklich und im Verlauf sichtbar.
 
 ---
 
@@ -157,8 +185,7 @@ entsteht ein Konflikt praktisch nie.
   kommt daran. Deshalb: Token auf ein einziges Repository begrenzen, Ablaufdatum setzen,
   bei Verlust sofort bei GitHub widerrufen.
 - Das Token wird **ausschliesslich an die eingetragene API-Adresse** gesendet. Wird die
-  Adresse von `https://api.github.com` abweichend gesetzt, zeigt die Anwendung eine rote
-  Warnung.
+  Adresse von `https://api.github.com` abweichend gesetzt, zeigt die Anwendung eine rote Warnung.
 - Das Token steht **in keiner Exportdatei und in keinem Ausdruck**.
 - **Niemals echte Bewohner-, Gesundheits- oder Personaldaten in die App oder ins
   App-Repository aufnehmen.** Das Werkzeug und der Katalog sind unbedenklich; die
