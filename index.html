@@ -333,9 +333,25 @@ var DEPLOY_DEFAULTS = {
 
   /* ---------- Engine ---------- */
 
+  /* Der globale Bereich: im Browser window beziehungsweise self, in Node
+     globalThis. Bewusst NICHT ueber die Variable root des Modulkopfs - die
+     liegt in dieser Funktion nicht im Sichtbereich. Genau dieser Fehler hat
+     im Browser geworfen, sobald keine fetch-Funktion uebergeben wurde; in
+     den Tests blieb er verborgen, weil dort immer eine mitgegeben wurde. */
+  function globalerBereich() {
+    if (typeof globalThis !== 'undefined') { return globalThis; }
+    if (typeof self !== 'undefined') { return self; }
+    if (typeof window !== 'undefined') { return window; }
+    return null;
+  }
+
   function create(config, deps) {
     deps = deps || {};
-    var doFetch = deps.fetchImpl || (typeof fetch !== 'undefined' ? fetch.bind(root) : null);
+    var doFetch = deps.fetchImpl || null;
+    if (!doFetch && typeof fetch !== 'undefined') {
+      var g = globalerBereich();
+      doFetch = (g && typeof fetch.bind === 'function') ? fetch.bind(g) : fetch;
+    }
     var cfg = {
       apiBase: (config.apiBase || 'https://api.github.com').replace(/\/+$/, ''),
       owner: config.owner || '',
@@ -1090,17 +1106,25 @@ var DEPLOY_DEFAULTS = {
 
     /* Schritt 1: Eingaben - laeuft rein lokal, kann nicht haengen. */
     try {
-      var probs = [];
-      if (!cfg.owner) { probs.push('Eigentuemer fehlt'); }
-      if (!cfg.repo) { probs.push('Repository fehlt'); }
-      if (!syncState.demo && !cfg.token) { probs.push('Token fehlt'); }
-      if (cfg.owner && !/^[A-Za-z0-9._-]+$/.test(cfg.owner)) { probs.push('Eigentuemer enthaelt ungewoehnliche Zeichen: ' + cfg.owner); }
-      if (cfg.repo && !/^[A-Za-z0-9._-]+$/.test(cfg.repo)) { probs.push('Repository enthaelt ungewoehnliche Zeichen: ' + cfg.repo); }
-      if (/[A-Z]/.test(cfg.folder)) { probs.push('Hinweis: Der Datenordner "' + cfg.folder + '" enthaelt Grossbuchstaben. Der Ordner wird beim ersten Speichern genau so angelegt - achten Sie auf gleiche Schreibweise.'); }
-      var detail = probs.length ? probs.join('; ') :
-        'Eigentuemer ' + cfg.owner + ', Repository ' + cfg.repo + ', Ordner ' + cfg.folder + ', Branch ' + cfg.branch + ', ' +
-        (syncState.demo ? 'Demo-Modus (kein GitHub noetig)' : (cfg.token ? 'Token vorhanden, ' + cfg.token.length + ' Zeichen' : 'kein Token'));
-      add('Eingaben', probs.length ? 'bad' : 'ok', detail);
+      var fehler = [];
+      var hinweise = [];
+      if (!cfg.owner) { fehler.push('Eigentuemer fehlt'); }
+      if (!cfg.repo) { fehler.push('Repository fehlt'); }
+      if (!syncState.demo && !cfg.token) { fehler.push('Token fehlt'); }
+      if (cfg.owner && !/^[A-Za-z0-9._-]+$/.test(cfg.owner)) { fehler.push('Eigentuemer enthaelt ungewoehnliche Zeichen: ' + cfg.owner); }
+      if (cfg.repo && !/^[A-Za-z0-9._-]+$/.test(cfg.repo)) { fehler.push('Repository enthaelt ungewoehnliche Zeichen: ' + cfg.repo); }
+      /* Kein Fehler, nur ein Hinweis: Grossbuchstaben im Ordnernamen sind
+         zulaessig. Wichtig ist allein, dass die Schreibweise ueberall
+         dieselbe bleibt. */
+      if (/[A-Z]/.test(cfg.folder)) { hinweise.push('Der Datenordner "' + cfg.folder + '" enthaelt Grossbuchstaben. Das ist zulaessig - achten Sie nur darauf, die Schreibweise ueberall gleich zu verwenden.'); }
+      if (cfg.branch && cfg.branch !== 'main' && cfg.branch !== 'master') { hinweise.push('Der Branch heisst "' + cfg.branch + '". Ueblich sind main oder master - bitte pruefen.'); }
+      if (/\s/.test(cfg.folder)) { hinweise.push('Der Datenordner enthaelt Leerzeichen. Das kann Probleme machen - besser ohne.'); }
+      var detail = fehler.concat(hinweise).join('; ');
+      if (!detail) {
+        detail = 'Eigentuemer ' + cfg.owner + ', Repository ' + cfg.repo + ', Ordner ' + cfg.folder + ', Branch ' + cfg.branch + ', ' +
+          (syncState.demo ? 'Demo-Modus (kein GitHub noetig)' : (cfg.token ? 'Token vorhanden, ' + cfg.token.length + ' Zeichen' : 'kein Token'));
+      }
+      add('Eingaben', fehler.length ? 'bad' : (hinweise.length ? 'warn' : 'ok'), detail);
     } catch (e) {
       add('Eingaben', 'bad', 'Interner Fehler: ' + String((e && e.message) || e));
       fertig();
