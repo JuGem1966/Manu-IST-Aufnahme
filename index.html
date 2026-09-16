@@ -455,7 +455,15 @@ var DEPLOY_DEFAULTS = {
       }
       if (result.status === 401) { return 'Token ungueltig oder abgelaufen (401).'; }
       if (result.status === 403) { return 'Zugriff verweigert (403). Fehlt die Berechtigung Contents: read/write?'; }
-      if (result.status === 404) { return 'Repository oder Pfad nicht gefunden (404). Schreibweise von Eigentuemer und Repository pruefen und ob das Token dieses Repository einschliesst.'; }
+      if (result.status === 404) {
+        return 'Repository nicht gefunden (404). Moegliche Ursachen, der Reihe nach: ' +
+          '(1) Eigentuemer oder Repository heissen anders - Schreibweise genau pruefen (Gross- und Kleinschreibung zaehlt nicht). ' +
+          '(2) Das Token schliesst dieses Repository nicht ein. Bei einem feinen Token unter "Repository access" entweder "All repositories" ' +
+          'oder "Only select repositories" mit angekreuztem Repository waehlen - die Voreinstellung "Public repositories" schliesst private aus. ' +
+          '(3) Das Repository existiert noch nicht. ' +
+          'Hinweis: GitHub antwortet bei privaten Repositories absichtlich mit 404 statt 403, damit die blosse Existenz nicht verraten wird. ' +
+          'Ein 403 bedeutet dagegen: Zugriff erkannt, aber Berechtigung fehlt.';
+      }
       if (result.status === 409) { return 'Konflikt: die Datei wurde zwischenzeitlich von jemand anderem geaendert (409).'; }
       if (result.status === 422) { return 'GitHub hat die Anfrage abgelehnt (422). Haeufig fehlt die sha beim Ueberschreiben.'; }
       var msg = result.data && (result.data.message || result.data.error);
@@ -562,6 +570,64 @@ var DEPLOY_DEFAULTS = {
             };
           });
           return { ok: true, commits: commits };
+        });
+      },
+
+      /* Wer steckt hinter dem Token? */
+      whoami: function () {
+        return request('GET', cfg.apiBase + '/user').then(function (r) {
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          var d = r.data || {};
+          return { ok: true, login: d.login, name: d.name, type: d.type };
+        });
+      },
+
+      /* Welche Repositories sieht dieses Token? Damit laesst sich eindeutig
+         klaeren, ob ein 404 an der Schreibweise oder am Tokenzugriff liegt. */
+      reposVisible: function (limit) {
+        var max = Number(limit || 200);
+        var alle = [];
+        function seite(n) {
+          var q = '?per_page=100&page=' + n + '&affiliation=owner,collaborator,organization_member&sort=full_name';
+          return request('GET', cfg.apiBase + '/user/repos' + q).then(function (r) {
+            if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+            var arr = Array.isArray(r.data) ? r.data : [];
+            arr.forEach(function (x) {
+              alle.push({
+                fullName: x.full_name || '',
+                name: x.name || '',
+                owner: (x.owner && x.owner.login) || '',
+                isPrivate: x.private === true,
+                canPush: !!(x.permissions && x.permissions.push)
+              });
+            });
+            if (arr.length === 100 && alle.length < max) { return seite(n + 1); }
+            return { ok: true, repos: alle };
+          });
+        }
+        return seite(1);
+      },
+
+      /* Kann dieses Token das eingestellte Repository sehen? */
+      canSeeRepo: function () {
+        var gesucht = (cfg.owner + '/' + cfg.repo).toLowerCase();
+        var wurzel = String(cfg.repo || '').toLowerCase();
+        return this.reposVisible().then(function (r) {
+          if (!r.ok) { return r; }
+          var treffer = null;
+          var aehnlich = [];
+          r.repos.forEach(function (x) {
+            var name = String(x.name || '').toLowerCase();
+            if (x.fullName.toLowerCase() === gesucht) { treffer = x; }
+            /* Aehnlichkeit in BEIDE Richtungen: sowohl "ist-aufnahme"
+               (Teil des gesuchten Namens) als auch "ist-aufnahme-daten-archiv"
+               (enthaelt den gesuchten Namen) sind hilfreiche Hinweise.
+               Leere Namen werden ausgeschlossen, sonst passt alles. */
+            else if (name && wurzel && (name.indexOf(wurzel) >= 0 || wurzel.indexOf(name) >= 0)) {
+              aehnlich.push(x.fullName);
+            }
+          });
+          return { ok: true, found: !!treffer, repo: treffer, total: r.repos.length, similar: aehnlich };
         });
       }
     };
@@ -1157,7 +1223,37 @@ var DEPLOY_DEFAULTS = {
       })
       .then(function () {
         var letzter = steps[steps.length - 1];
-        if (letzter && letzter.state === 'bad') { return null; }
+        if (letzter && letzter.state === 'bad') {
+          /* 404 richtig deuten: liegt es an der Schreibweise oder am
+             Tokenzugriff? Das laesst sich mit zwei weiteren Abfragen
+             eindeutig klaeren. */
+          if (letzter.name !== 'Zugriff auf das Repository') { return null; }
+          return grenze(eng.whoami(), 'Token pruefen').then(function (w) {
+            if (!w.ok) {
+              add('Token pruefen', 'bad', w.message + ' Ohne gueltiges Token laesst sich nichts ablegen.');
+              return null;
+            }
+            add('Token und Konto', 'ok', 'Das Token gehoert zum Konto "' + w.login + '"' + (w.type ? ' (' + w.type + ')' : '') + '.');
+            if (cfg.owner && String(w.login).toLowerCase() !== String(cfg.owner).toLowerCase()) {
+              add('Kontoabgleich', 'warn', 'Das Token gehoert zu "' + w.login + '", eingetragen ist aber "' + cfg.owner + '". ' +
+                'Das ist in Ordnung, wenn das Repository einer Organisation gehoert - sonst bitte den Eigentuemer korrigieren.');
+            }
+            return grenze(eng.canSeeRepo(), 'Repositoryliste des Tokens').then(function (s) {
+              if (!s.ok) { add('Repositoryliste des Tokens', 'warn', s.message); return; }
+              if (s.found) {
+                add('Repositoryliste des Tokens', 'ok', 'Das Token sieht "' + cfg.owner + '/' + cfg.repo + '" (' +
+                  (s.repo.isPrivate ? 'privat' : 'oeffentlich') + (s.repo.canPush ? ', Schreibrecht' : ', nur Lesen') + '). ' +
+                  'Der 404 hat dann eine andere Ursache - bitte die Schreibweise von Ordner und Branch pruefen.');
+              } else {
+                add('Repositoryliste des Tokens', 'bad', 'Das Token sieht ' + s.total + ' Repositories, aber "' + cfg.owner + '/' + cfg.repo +
+                  '" ist NICHT darunter. Damit ist die Ursache klar: Nicht die Schreibweise, sondern der Tokenzugriff. ' +
+                  (s.similar.length ? 'Aehnlich lautende Repositories im Zugriff: ' + s.similar.join(', ') + '. ' : '') +
+                  'Abhilfe: Beim feinen Token unter "Repository access" statt "Public repositories" entweder "All repositories" oder ' +
+                  '"Only select repositories" mit angekreuztem Repository waehlen und das Token danach neu erzeugen.');
+              }
+            });
+          });
+        }
         var probe = { schema: 'ist-aufnahme-neuhaus/diagnose', at: new Date().toISOString(), hinweis: 'Diese Datei legt die Diagnose an und entfernt sie sofort wieder.' };
         return grenze(eng.write(probePath, probe, null, 'Diagnose: Schreibtest (wird sofort entfernt)'), 'Schreibtest').then(function (w) {
           if (!w.ok) {
