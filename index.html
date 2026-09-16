@@ -1,0 +1,2293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IST-Aufnahme der Anwendungen – Neuhaus Wohn- und Pflegezentrum Wängi</title>
+<style>
+  :root {
+    --primary: #1c5d51;
+    --primary-dark: #123f37;
+    --primary-light: #e3f0ec;
+    --accent: #8a6a2f;
+    --accent-light: #f6efdf;
+    --danger: #b03a2e;
+    --warning: #b57d05;
+    --bg: #f6f7f6;
+    --card: #ffffff;
+    --text: #1f2523;
+    --muted: #6b7772;
+    --border: #d9e0dc;
+    --radius: 8px;
+    --shadow: 0 1px 2px rgba(18,63,55,0.06), 0 4px 12px rgba(18,63,55,0.05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--text); margin: 0; line-height: 1.55; font-size: 15px;
+  }
+  h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", "Liberation Serif", serif; }
+  header {
+    background: var(--primary); color: #fff; padding: 0.9rem 1.5rem 0;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  }
+  .brand { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+  .brand-mark {
+    width: 42px; height: 42px; border-radius: 10px; background: var(--accent-light); color: var(--primary-dark);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem;
+    font-family: Georgia, serif; flex-shrink: 0;
+  }
+  header h1 { margin: 0; font-size: 1.22rem; letter-spacing: 0.2px; }
+  header .sub { margin: 0.1rem 0 0; font-size: 0.82rem; color: #cfe3dd; }
+  .header-actions { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-left: auto; padding-bottom: 0.5rem; }
+  .progress { height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px 2px 0 0; margin: 0 -1.5rem; }
+  .progress > span { display: block; height: 100%; width: 0; background: #e9d9a8; transition: width 0.3s; }
+  .tabs { display: flex; gap: 0.4rem; padding: 0.85rem 1.5rem 0; background: var(--card); border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 0.5rem 1rem; border: 1px solid var(--border); border-bottom: none; background: var(--bg);
+    border-radius: var(--radius) var(--radius) 0 0; cursor: pointer; font-size: 0.95rem;
+  }
+  .tab.active { background: var(--card); color: var(--primary); font-weight: 600; border-color: var(--border); box-shadow: 0 -2px 0 var(--primary) inset; }
+  .container { display: flex; align-items: stretch; min-height: calc(100vh - 150px); }
+  nav { width: 280px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border); padding: 1rem; overflow-y: auto; }
+  nav h2 { font-size: 0.78rem; color: var(--muted); margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.6px; font-family: inherit; }
+  .nav-item { display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.65rem; border-radius: var(--radius); cursor: pointer; margin-bottom: 0.2rem; font-size: 0.9rem; }
+  .nav-item:hover { background: var(--primary-light); }
+  .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+  .nav-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .nav-item.valid .dot { background: var(--primary); }
+  .nav-item.invalid .dot { background: var(--danger); }
+  .nav-item.partial .dot { background: var(--warning); }
+  .app-chip {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.65rem; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 0.88rem; margin-bottom: 0.3rem;
+  }
+  .app-chip.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
+  .app-chip .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-chip .pct { font-size: 0.75rem; color: var(--muted); }
+  .app-chip .remove { color: var(--danger); font-weight: bold; }
+  main { flex: 1; padding: 1.25rem 1.5rem 3rem; overflow-y: auto; min-width: 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; color: var(--primary-dark); }
+  .card .intro { color: var(--muted); font-size: 0.9rem; margin: 0 0 1.2rem; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: var(--radius); padding: 0.7rem 0.9rem; }
+  .kpi .val { font-size: 1.5rem; font-weight: 700; color: var(--primary-dark); font-family: Georgia, serif; }
+  .kpi .lbl { font-size: 0.8rem; color: var(--muted); }
+  .kpi.warn { border-left-color: var(--warning); }
+  .kpi.danger { border-left-color: var(--danger); }
+  .kpi.gold { border-left-color: var(--accent); }
+  .toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.85rem; }
+  .toolbar input[type="text"], .toolbar select { max-width: 260px; }
+  .matrix-wrap { overflow-x: auto; }
+  table.matrix { width: 100%; min-width: 920px; border-collapse: collapse; font-size: 0.88rem; }
+  table.matrix th, table.matrix td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.matrix th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); cursor: pointer; }
+  table.matrix tbody tr { cursor: pointer; }
+  table.matrix tbody tr:hover { background: var(--primary-light); }
+  .pill { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.78rem; background: var(--bg); border: 1px solid var(--border); }
+  .pill.k4, .pill.prio-hoch, .pill.time-invest { background: #fbe9e7; border-color: #e8b4ad; color: #8c2d22; }
+  .pill.k3, .pill.prio-mittel { background: var(--accent-light); border-color: #e3d3ac; color: #6d5220; }
+  .pill.k1, .pill.k2, .pill.prio-tief { background: var(--primary-light); border-color: #bcd8cf; color: var(--primary-dark); }
+  .bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .bar > span { display: block; height: 100%; background: var(--primary); }
+  .field { margin-bottom: 1.15rem; }
+  .field label { display: block; font-weight: 600; margin-bottom: 0.3rem; font-size: 0.95rem; }
+  .field .hint { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.35rem; }
+  .required label::after { content: " *"; color: var(--danger); }
+  input[type="text"], input[type="date"], input[type="number"], textarea, select, input[type="search"] {
+    width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 0.95rem; font-family: inherit; background: #fff; color: var(--text);
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .invalid input, .invalid textarea, .invalid select { border-color: var(--danger); }
+  .error-msg { color: var(--danger); font-size: 0.86rem; margin-top: 0.4rem; }
+  .checkbox-group, .radio-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .checkbox-group label { font-weight: normal; display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+  .checkbox-group input { width: auto; }
+  .scale-option { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem 0.7rem; margin-bottom: 0.4rem; cursor: pointer; }
+  .scale-option:hover { background: var(--primary-light); }
+  .scale-option.selected { border-color: var(--primary); background: var(--primary-light); }
+  .scale-option .score { font-weight: 700; color: var(--primary); margin-right: 0.5rem; }
+  .scale-option .anchor { color: var(--muted); font-size: 0.87rem; display: block; }
+  .list-input { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .list-input input { flex: 1; }
+  .list-items, .selected-caps { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .tag { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--primary-light); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; }
+  .tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; }
+  .suggest { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0 0; }
+  .suggest button { border: 1px dashed var(--border); background: transparent; border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.82rem; cursor: pointer; color: var(--muted); }
+  .suggest button:hover { border-color: var(--primary); color: var(--primary); }
+  .object-list { overflow-x: auto; }
+  .object-list table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
+  .object-list th, .object-list td { text-align: left; padding: 0.4rem; border-bottom: 1px solid var(--border); }
+  .object-list th { font-weight: 600; font-size: 0.8rem; color: var(--muted); }
+  .object-list input, .object-list select { padding: 0.35rem; font-size: 0.88rem; }
+  .cap-tools { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .cap-tools input[type="search"] { flex: 1; min-width: 180px; }
+  .cap-tools .count { font-size: 0.85rem; color: var(--muted); }
+  .capability-picker { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; background: #fff; }
+  .cap-domain { margin-bottom: 0.6rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.4rem; }
+  .cap-domain > h4 { margin: 0 0 0.3rem; font-size: 0.92rem; color: var(--primary-dark); cursor: pointer; font-family: inherit; }
+  .cap-domain.collapsed .cap-group, .cap-domain.collapsed .cap-item { display: none; }
+  .cap-group { margin-left: 0.6rem; margin-bottom: 0.45rem; }
+  .cap-group h5 { margin: 0 0 0.15rem; font-size: 0.86rem; font-weight: 600; }
+  .cap-item { display: flex; align-items: flex-start; gap: 0.4rem; margin-left: 0.7rem; font-size: 0.86rem; }
+  .cap-item input { margin-top: 0.28rem; }
+  .cap-item .cap-id { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--muted); min-width: 6.6rem; font-size: 0.78rem; }
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
+  .btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.9rem; border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-family: inherit; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-secondary { background: var(--card); border-color: var(--border); color: var(--text); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.4); color: #fff; }
+  .btn:hover { opacity: 0.92; }
+  .btn-sm { padding: 0.25rem 0.55rem; font-size: 0.82rem; }
+  .status-bar { color: var(--muted); font-size: 0.85rem; }
+  .hidden { display: none !important; }
+  .help-panel { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 0.75rem 1rem; margin-bottom: 1rem; border-radius: 0 var(--radius) var(--radius) 0; font-size: 0.9rem; }
+  .help-panel h4 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+  .help-panel p { margin: 0 0 0.35rem; }
+  .help-panel .small { font-size: 0.82rem; color: #6d5220; }
+  .sync-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.7rem; border-radius: 999px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.35); color: #fff; white-space: nowrap; }
+  .sync-pill.ok { background: #1f7a4d; }
+  .sync-pill.warn { background: #8a6a2f; }
+  .sync-pill.bad { background: #b03a2e; }
+  .sync-pill.demo { background: #3d5a80; }
+  .sync-pill.off { background: rgba(255,255,255,0.12); }
+  .sync-row { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 0.9rem; }
+  .sync-switch { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: normal; margin: 0; }
+  .sync-switch input { width: auto; }
+  .sync-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 1rem; }
+  .sync-badge { display: inline-block; padding: 0.12rem 0.5rem; border-radius: 999px; font-size: 0.78rem; border: 1px solid var(--border); background: var(--bg); white-space: nowrap; }
+  .sync-badge.ok { background: var(--primary-light); border-color: #bcd8cf; color: var(--primary-dark); }
+  .sync-badge.ausstehend { background: var(--accent-light); border-color: #e3d3ac; color: #6d5220; }
+  .sync-badge.neu { background: #eef1f0; color: var(--muted); }
+  .sync-badge.konflikt { background: #fbe9e7; border-color: #e8b4ad; color: #8c2d22; }
+  .conflict-row { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; flex-wrap: wrap; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .sync-log { max-height: 260px; overflow-y: auto; font-size: 0.85rem; }
+  .sync-log-row { display: flex; gap: 0.7rem; padding: 0.25rem 0; border-bottom: 1px dotted var(--border); }
+  .sync-log-row .t { color: var(--muted); flex: 0 0 8.5rem; }
+  .sync-log-row.ok span:last-child { color: var(--primary-dark); }
+  .sync-log-row.bad span:last-child { color: var(--danger); }
+  .sync-log-row.warn span:last-child { color: #8a6a2f; }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; }
+  .nowrap { white-space: nowrap; }
+  #printReport { display: none; }
+  @media print {
+    header, nav, .tabs, .actions, .header-actions, .card .help-panel { display: none !important; }
+    body { background: #fff; font-size: 11pt; }
+    .container { display: block; }
+    main { padding: 0; overflow: visible; }
+    .card { box-shadow: none; border: none; page-break-inside: avoid; padding: 0 0 0.6rem; }
+    #printReport { display: block; }
+    .print-section { page-break-inside: avoid; margin-bottom: 0.8rem; }
+    .print-section h3 { border-bottom: 1px solid #999; padding-bottom: 0.15rem; font-size: 12pt; }
+    .print-row { display: flex; gap: 0.5rem; font-size: 10pt; border-bottom: 1px dotted #ccc; padding: 0.15rem 0; }
+    .print-row .k { flex: 0 0 38%; font-weight: 600; }
+    .print-row .v { flex: 1; }
+  }
+  @media (max-width: 900px) {
+    .container { flex-direction: column; }
+    nav { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-mark">N</div>
+    <div>
+      <h1>IST-Aufnahme der Anwendungen</h1>
+      <p class="sub">Stiftung Neuhaus · Wohn- und Pflegezentrum, Wängi · Instrument IST-Aufnahme der Anwendungen – Wohn- und Pflegezentrum · Katalog 1.0 (Stand 2026-09-16)</p>
+    </div>
+    <div class="header-actions">
+      <span id="syncPill" class="sync-pill off">Sync: nicht eingerichtet</span>
+      <button class="btn btn-ghost" onclick="appActions.newApp()">+ Neue Anwendung</button>
+      <button class="btn btn-ghost" onclick="appActions.duplicateApp()">Duplizieren</button>
+      <button class="btn btn-ghost" onclick="appActions.saveToFile()">Speichern</button>
+      <label class="btn btn-ghost" style="cursor:pointer;">Laden<input type="file" id="loadFile" accept=".json" style="display:none" onchange="appActions.loadFromFile(event)"></label>
+      <button class="btn btn-ghost" onclick="appActions.exportJson()">Export JSON</button>
+      <button class="btn btn-ghost" onclick="appActions.exportCsv()">Export CSV</button>
+      <button class="btn btn-ghost" onclick="appActions.printReport()">Drucken / PDF</button>
+    </div>
+  </div>
+  <div class="progress"><span id="progressBar"></span></div>
+</header>
+
+<div class="tabs">
+  <div class="tab" id="tabUebersicht" onclick="appActions.setView('uebersicht')">Übersicht und Auswertung</div>
+  <div class="tab" id="tabErfassung" onclick="appActions.setView('erfassung')">Erfassung je Anwendung</div>
+  <div class="tab" id="tabSync" onclick="appActions.setView('sync')">Synchronisation</div>
+</div>
+
+<div class="container">
+  <nav>
+    <h2>Anwendungen</h2>
+    <div id="appList"></div>
+    <div style="margin-top:0.6rem;"><button class="btn btn-secondary btn-sm" onclick="appActions.newApp()">+ Anwendung erfassen</button></div>
+    <h2 style="margin-top:1.3rem;" id="sectionsHeading">Abschnitte</h2>
+    <div id="sectionNav"></div>
+    <div style="margin-top:1rem;font-size:0.78rem;color:var(--muted);">
+      Alle Angaben bleiben lokal im Browser (LocalStorage). Es werden keine Daten an einen Server übertragen.
+    </div>
+  </nav>
+  <main>
+    <div id="viewUebersicht"></div>
+    <div id="viewErfassung" class="hidden">
+      <div id="formArea"></div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="appActions.prevSection()">← Zurück</button>
+        <span class="status-bar" id="statusBar"></span>
+        <button class="btn btn-primary" onclick="appActions.nextSection()">Weiter →</button>
+      </div>
+    </div>
+    <div id="viewSync" class="hidden"></div>
+  </main>
+</div>
+
+<div id="printReport"></div>
+
+<script>
+/*
+ * sync-engine.js
+ * Sync-Kern fuer die IST-Aufnahme-WebApp: legt jeden Erfassungsbogen als
+ * JSON-Datei in einem GitHub-Repository ab (Variante A).
+ *
+ * Laeuft unveraendert im Browser UND in Node:
+ *   Browser:  window.SyncEngine
+ *   Node:     require('./sync-engine.js')
+ *
+ * Bewusste Entscheidungen:
+ *  - Keine Template-Literale, keine Apostrophe in Meldungstexten, damit die
+ *    Datei ohne Escape-Fallen in die HTML-Datei eingebettet werden kann.
+ *  - Jede Funktion gibt ein Ergebnisobjekt zurueck, statt Exceptions zu werfen.
+ *  - Die Demo-Variante (createDemoFetch) bildet dieselben Antworten nach wie
+ *    die echte GitHub-API, inklusive sha-Konflikt mit Status 409.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.SyncEngine = factory();
+  }
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /* ---------- Kodierung ---------- */
+
+  function toBase64(str) {
+    var bytes = new TextEncoder().encode(str);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) { bin += String.fromCharCode(bytes[i]); }
+    return btoa(bin);
+  }
+
+  function fromBase64(b64) {
+    var bin = atob(String(b64).replace(/\s/g, ''));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+    return new TextDecoder().decode(bytes);
+  }
+
+  /* Kurzer, stabiler Hash als Ersatz fuer den Git-SHA in der Demo. */
+  function shortHash(str) {
+    var h1 = 0x811c9dc5, h2 = 0x1000193;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      h1 = ((h1 ^ c) * 16777619) >>> 0;
+      h2 = ((h2 + c * 31) ^ (h1 >>> 7)) >>> 0;
+    }
+    var a = h1.toString(16).padStart(8, '0');
+    var b = h2.toString(16).padStart(8, '0');
+    return (a + b + a + b + '0'.repeat(8)).slice(0, 40);
+  }
+
+  function buildPath(folder, appId) {
+    var f = String(folder || '').replace(/^\/+|\/+$/g, '');
+    var name = String(appId).replace(/[^a-zA-Z0-9._-]/g, '_') + '.json';
+    return f ? f + '/' + name : name;
+  }
+
+  function isTrustedHost(apiBase) {
+    try {
+      var host = String(apiBase).replace(/^https?:\/\//, '').split('/')[0].split(':')[0].toLowerCase();
+      return host === 'api.github.com' || host === 'localhost' || host === '127.0.0.1';
+    } catch (e) { return false; }
+  }
+
+  /* ---------- Engine ---------- */
+
+  function create(config, deps) {
+    deps = deps || {};
+    var doFetch = deps.fetchImpl || (typeof fetch !== 'undefined' ? fetch.bind(root) : null);
+    var cfg = {
+      apiBase: (config.apiBase || 'https://api.github.com').replace(/\/+$/, ''),
+      owner: config.owner || '',
+      repo: config.repo || '',
+      branch: config.branch || 'main',
+      folder: config.folder || 'daten',
+      token: config.token || ''
+    };
+
+    function headers(extra) {
+      var h = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+      if (cfg.token && isTrustedHost(cfg.apiBase)) { h['Authorization'] = 'Bearer ' + cfg.token; }
+      if (extra) { for (var k in extra) { if (extra.hasOwnProperty(k)) { h[k] = extra[k]; } } }
+      return h;
+    }
+
+    function url(path, query) {
+      var u = cfg.apiBase + '/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo) + path;
+      if (query) {
+        var parts = [];
+        for (var k in query) {
+          if (query.hasOwnProperty(k) && query[k] !== undefined && query[k] !== null && query[k] !== '') {
+            parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(query[k]));
+          }
+        }
+        if (parts.length) { u += '?' + parts.join('&'); }
+      }
+      return u;
+    }
+
+    /* Fuehrt eine Anfrage aus und normalisiert Fehler zu einem Ergebnisobjekt. */
+    function request(method, fullUrl, body) {
+      if (!doFetch) { return Promise.resolve({ ok: false, status: 0, error: 'keine_fetch_funktion' }); }
+      var opts = { method: method, headers: headers(body ? { 'Content-Type': 'application/json' } : null) };
+      if (body) { opts.body = JSON.stringify(body); }
+      return doFetch(fullUrl, opts).then(function (res) {
+        return res.text().then(function (text) {
+          var data = null;
+          if (text) { try { data = JSON.parse(text); } catch (e) { data = { raw: text }; } }
+          return { ok: res.ok, status: res.status, data: data };
+        });
+      }).catch(function (err) {
+        return { ok: false, status: 0, error: String((err && err.message) || err) };
+      });
+    }
+
+    function explain(result) {
+      if (result.status === 0) { return 'Netzwerk- oder CORS-Fehler: ' + (result.error || 'unbekannt'); }
+      if (result.status === 401) { return 'Token ungueltig oder abgelaufen (401).'; }
+      if (result.status === 403) { return 'Zugriff verweigert (403). Fehlt die Berechtigung Contents: read/write?'; }
+      if (result.status === 404) { return 'Repository oder Pfad nicht gefunden (404). Schreibweise von Eigentuemer und Repository pruefen und ob das Token dieses Repository einschliesst.'; }
+      if (result.status === 409) { return 'Konflikt: die Datei wurde zwischenzeitlich von jemand anderem geaendert (409).'; }
+      if (result.status === 422) { return 'GitHub hat die Anfrage abgelehnt (422). Haeufig fehlt die sha beim Ueberschreiben.'; }
+      var msg = result.data && (result.data.message || result.data.error);
+      return msg ? msg : 'GitHub antwortete mit Status ' + result.status + '.';
+    }
+
+    return {
+      config: cfg,
+      explain: explain,
+      buildPath: buildPath,
+
+      /* Verbindung und Rechte pruefen. */
+      check: function () {
+        return request('GET', url('')).then(function (r) {
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          var d = r.data || {};
+          return {
+            ok: true,
+            status: r.status,
+            fullName: d.full_name,
+            isPrivate: d.private === true,
+            defaultBranch: d.default_branch
+          };
+        });
+      },
+
+      /* Dateien im Datenordner auflisten. Leerer Ordner ergibt eine leere Liste. */
+      list: function () {
+        return request('GET', url('/contents/' + encodeURIComponent(cfg.folder).replace(/%2F/g, '/'), { ref: cfg.branch })).then(function (r) {
+          if (r.status === 404) { return { ok: true, files: [] }; }
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!Array.isArray(r.data)) { return { ok: true, files: [] }; }
+          var files = r.data.filter(function (e) { return e.type === 'file' && /\.json$/i.test(e.name); })
+            .map(function (e) { return { name: e.name, path: e.path, sha: e.sha, size: e.size }; });
+          return { ok: true, files: files };
+        });
+      },
+
+      /* Einen Bogen lesen. */
+      read: function (path) {
+        return request('GET', url('/contents/' + path.split('/').map(encodeURIComponent).join('/'), { ref: cfg.branch })).then(function (r) {
+          if (r.status === 404) { return { ok: false, status: 404, missing: true, message: 'noch nicht vorhanden' }; }
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          var d = r.data || {};
+          try {
+            var json = JSON.parse(fromBase64(d.content));
+            return { ok: true, sha: d.sha, json: json, size: d.size };
+          } catch (e) {
+            return { ok: false, status: 200, message: 'Inhalt konnte nicht gelesen werden: ' + e.message };
+          }
+        });
+      },
+
+      /* Einen Bogen schreiben. Ohne sha wird neu angelegt, mit sha ueberschrieben.
+         Eine veraltete sha beantwortet GitHub mit 409 - hier als conflict gemeldet. */
+      write: function (path, obj, sha, message) {
+        var body = {
+          message: message || ('IST-Aufnahme: ' + path + ' aktualisiert'),
+          content: toBase64(JSON.stringify(obj, null, 2)),
+          branch: cfg.branch
+        };
+        if (sha) { body.sha = sha; }
+        return request('PUT', url('/contents/' + path.split('/').map(encodeURIComponent).join('/')), body).then(function (r) {
+          if (r.status === 409) {
+            return { ok: false, conflict: true, status: 409, message: explain(r) };
+          }
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          var d = r.data || {};
+          return {
+            ok: true,
+            status: r.status,
+            sha: d.content && d.content.sha,
+            commit: d.commit && d.commit.sha,
+            created: r.status === 201
+          };
+        });
+      },
+
+      /* Eine Datei entfernen. */
+      remove: function (path, sha, message) {
+        return request('DELETE', url('/contents/' + path.split('/').map(encodeURIComponent).join('/')), {
+          message: message || ('IST-Aufnahme: ' + path + ' entfernt'),
+          sha: sha,
+          branch: cfg.branch
+        }).then(function (r) {
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          return { ok: true, status: r.status };
+        });
+      },
+
+      /* Aenderungsverlauf einer Datei. */
+      history: function (path, limit) {
+        return request('GET', url('/commits', { path: path, sha: cfg.branch, per_page: limit || 15 })).then(function (r) {
+          if (r.status === 404 || r.status === 409) { return { ok: true, commits: [] }; }
+          if (!r.ok) { return { ok: false, status: r.status, message: explain(r) }; }
+          if (!Array.isArray(r.data)) { return { ok: true, commits: [] }; }
+          var commits = r.data.map(function (c) {
+            return {
+              sha: c.sha,
+              shortSha: String(c.sha || '').slice(0, 7),
+              message: (c.commit && c.commit.message) || '',
+              date: (c.commit && c.commit.author && c.commit.author.date) || '',
+              author: (c.commit && c.commit.author && c.commit.author.name) || ''
+            };
+          });
+          return { ok: true, commits: commits };
+        });
+      }
+    };
+  }
+
+  /* ---------- Demo: nachgebildete GitHub-API ----------
+   * Bildet die Endpunkte nach, die die Engine benutzt, inklusive sha-Konflikt.
+   * Der Speicher wird vom Aufrufer gehalten (im Browser im localStorage).
+   */
+  function createDemoFetch(store, options) {
+    options = options || {};
+    var latency = options.latency === undefined ? 120 : options.latency;
+    store.files = store.files || {};
+    store.commits = store.commits || [];
+    var clock = Number(store.clock || 0);
+
+    function stamp() {
+      clock += 60000;
+      store.clock = clock;
+      return new Date(Date.now() - (600000 - clock)).toISOString();
+    }
+
+    function respond(status, payload) {
+      var body = payload === undefined ? '' : JSON.stringify(payload);
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve({
+            ok: status >= 200 && status < 300,
+            status: status,
+            text: function () { return Promise.resolve(body); },
+            json: function () { return Promise.resolve(JSON.parse(body || 'null')); }
+          });
+        }, latency);
+      });
+    }
+
+    function addCommit(path, message, author) {
+      var entry = { sha: shortHash(path + message + stamp()), path: path, message: message, date: stamp(), author: author };
+      store.commits.unshift(entry);
+      return entry.sha;
+    }
+
+    return function demoFetch(input, init) {
+      var u = String(input);
+      var method = (init && init.method) || 'GET';
+      var path = u.replace(/^https?:\/\/[^/]+/, '');
+      var qIndex = path.indexOf('?');
+      var query = {};
+      if (qIndex >= 0) {
+        path.slice(qIndex + 1).split('&').forEach(function (kv) {
+          var p = kv.split('=');
+          query[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || '');
+        });
+        path = path.slice(0, qIndex);
+      }
+      var segments = path.split('/').filter(Boolean);
+      // /repos/{owner}/{repo}/...
+      if (segments[0] !== 'repos' || segments.length < 3) { return respond(404, { message: 'Not Found' }); }
+      var owner = decodeURIComponent(segments[1]);
+      var repo = decodeURIComponent(segments[2]);
+      var rest = segments.slice(3);
+      var body = null;
+      if (init && init.body) { try { body = JSON.parse(init.body); } catch (e) { body = null; } }
+
+      if (!owner || !repo) { return respond(404, { message: 'Not Found' }); }
+
+      // Repository
+      if (rest.length === 0) {
+        if (method === 'GET') {
+          return respond(200, { full_name: owner + '/' + repo, private: true, default_branch: 'main', permissions: { push: true } });
+        }
+        return respond(405, { message: 'Method Not Allowed' });
+      }
+
+      // Verlauf
+      if (rest[0] === 'commits' && rest.length === 1) {
+        if (query.path) { return respond(200, store.commits.filter(function (c) { return c.path === query.path; })); }
+        return respond(200, store.commits.slice(0, 30));
+      }
+
+      // Inhalte
+      if (rest[0] === 'contents') {
+        var filePath = rest.slice(1).map(decodeURIComponent).join('/');
+
+        // Ordner auflisten
+        var folderName = filePath;
+        var inFolder = Object.keys(store.files).filter(function (k) {
+          return k.indexOf(folderName + '/') === 0 && k.slice(folderName.length + 1).indexOf('/') < 0;
+        });
+        var isFolderListing = inFolder.length > 0 || (filePath !== '' && store.files[filePath] === undefined && method === 'GET');
+
+        if (method === 'GET' && isFolderListing) {
+          if (inFolder.length === 0) { return respond(404, { message: 'Not Found' }); }
+          return respond(200, inFolder.map(function (k) {
+            return { type: 'file', name: k.split('/').pop(), path: k, sha: store.files[k].sha, size: store.files[k].content.length };
+          }));
+        }
+
+        if (method === 'GET') {
+          var f = store.files[filePath];
+          if (!f) { return respond(404, { message: 'Not Found' }); }
+          return respond(200, { type: 'file', name: filePath.split('/').pop(), path: filePath, sha: f.sha, size: f.content.length, encoding: 'base64', content: f.content });
+        }
+
+        if (method === 'PUT') {
+          if (!body || typeof body.content !== 'string') { return respond(422, { message: 'Invalid request' }); }
+          var existing = store.files[filePath];
+          if (existing) {
+            if (!body.sha) { return respond(422, { message: 'sha required for update' }); }
+            if (body.sha !== existing.sha) { return respond(409, { message: 'sha does not match' }); }
+          }
+          var newSha = shortHash(body.content + stamp());
+          store.files[filePath] = { sha: newSha, content: body.content };
+          var commitSha = addCommit(filePath, body.message || 'update', 'Demo');
+          return respond(existing ? 200 : 201, {
+            content: { name: filePath.split('/').pop(), path: filePath, sha: newSha },
+            commit: { sha: commitSha }
+          });
+        }
+
+        if (method === 'DELETE') {
+          var g = store.files[filePath];
+          if (!g) { return respond(404, { message: 'Not Found' }); }
+          if (body && body.sha && body.sha !== g.sha) { return respond(409, { message: 'sha does not match' }); }
+          delete store.files[filePath];
+          var delSha = addCommit(filePath, (body && body.message) || 'delete', 'Demo');
+          return respond(200, { commit: { sha: delSha } });
+        }
+      }
+      return respond(404, { message: 'Not Found' });
+    };
+  }
+
+  return {
+    create: create,
+    createDemoFetch: createDemoFetch,
+    toBase64: toBase64,
+    fromBase64: fromBase64,
+    shortHash: shortHash,
+    buildPath: buildPath,
+    isTrustedHost: isTrustedHost
+  };
+});
+
+</script>
+<script>
+/*
+ * sync-ui.js
+ * Oberflaeche der Synchronisation fuer die IST-Aufnahme-WebApp (Variante A:
+ * GitHub-Repository als Datenspeicher).
+ *
+ * Wird vom Build-Skript in die HTML-Datei eingebettet und laeuft dort nach
+ * dem Hauptskript. Nutzt die globalen Funktionen des Hauptskripts
+ * (state, save, completeness, escapeHtml) und window.SyncEngine.
+ */
+(function () {
+  'use strict';
+
+  var SYNC_KEY = 'ist-aufnahme-neuhaus-sync-v1';
+  var DEMO_KEY = 'ist-aufnahme-neuhaus-demostore-v1';
+  var PENDING = 'ausstehend';
+  var AUTO_DELAY = 2500;
+
+  var syncState = {
+    configured: false,
+    demo: false,
+    auto: true,
+    apiBase: 'https://api.github.com',
+    owner: '',
+    repo: '',
+    branch: 'main',
+    folder: 'daten',
+    token: '',
+    lastSync: '',
+    shas: {},
+    pushedAt: {},
+    conflicts: {},
+    log: [],
+    history: null,
+    selftest: null,
+    busy: false
+  };
+
+  var runtime = { demoFetch: null, timer: null, mounted: false };
+
+  /* ---------------- Zustand ---------------- */
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(SYNC_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        Object.keys(parsed).forEach(function (k) {
+          if (Object.prototype.hasOwnProperty.call(syncState, k)) { syncState[k] = parsed[k]; }
+        });
+      }
+    } catch (e) { /* beschaedigter Eintrag wird ignoriert */ }
+    syncState.busy = false;
+    syncState.history = null;
+    syncState.selftest = null;
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(SYNC_KEY, JSON.stringify({
+        configured: syncState.configured,
+        demo: syncState.demo,
+        auto: syncState.auto,
+        apiBase: syncState.apiBase,
+        owner: syncState.owner,
+        repo: syncState.repo,
+        branch: syncState.branch,
+        folder: syncState.folder,
+        token: syncState.token,
+        lastSync: syncState.lastSync,
+        shas: syncState.shas,
+        pushedAt: syncState.pushedAt,
+        log: syncState.log.slice(0, 60)
+      }));
+    } catch (e) { /* Speicher voll oder gesperrt */ }
+  }
+
+  function log(text, kind) {
+    syncState.log.unshift({ at: new Date().toISOString(), text: text, kind: kind || 'info' });
+    syncState.log = syncState.log.slice(0, 60);
+  }
+
+  function isTrusted() {
+    return window.SyncEngine.isTrustedHost(syncState.apiBase || '');
+  }
+
+  function engineConfig() {
+    return {
+      apiBase: syncState.apiBase || 'https://api.github.com',
+      owner: (syncState.owner || '').trim(),
+      repo: (syncState.repo || '').trim(),
+      branch: (syncState.branch || 'main').trim(),
+      folder: (syncState.folder || 'daten').trim(),
+      token: (syncState.token || '').trim()
+    };
+  }
+
+  /* ---------------- Demo-Speicher ---------------- */
+
+  function loadDemoStore() {
+    try {
+      var raw = localStorage.getItem(DEMO_KEY);
+      if (raw) { return JSON.parse(raw); }
+    } catch (e) { /* neu anfangen */ }
+    return { files: {}, commits: [], clock: 0 };
+  }
+
+  function persistDemoStore() {
+    if (!runtime.store) { return; }
+    try { localStorage.setItem(DEMO_KEY, JSON.stringify(runtime.store)); } catch (e) { /* egal */ }
+  }
+
+  function demoFetch() {
+    if (!runtime.demoFetch) {
+      runtime.store = loadDemoStore();
+      runtime.demoFetch = window.SyncEngine.createDemoFetch(runtime.store, { latency: 90 });
+    }
+    return runtime.demoFetch;
+  }
+
+  function getEngine(useDemo) {
+    var impl = useDemo ? demoFetch() : undefined;
+    return window.SyncEngine.create(engineConfig(), { fetchImpl: impl });
+  }
+
+  function resetRuntime() {
+    runtime.demoFetch = null;
+    runtime.store = null;
+  }
+
+  /* ---------------- Hilfen ---------------- */
+
+  function appName(app) { return (app && app.data && app.data.anwendungsname) || 'Neue Anwendung'; }
+
+  function fmt(iso) {
+    if (!iso) { return '–'; }
+    try { return new Date(iso).toLocaleString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return iso; }
+  }
+
+  function isDirty(app) {
+    var changed = app.meta && app.meta.localChange;
+    if (!changed) { return false; }
+    var pushed = syncState.pushedAt[app.id];
+    return !pushed || changed > pushed;
+  }
+
+  function appPath(app) { return window.SyncEngine.buildPath(syncState.folder, app.id); }
+
+  function wrap(app) {
+    return {
+      schema: 'ist-aufnahme-neuhaus/v1',
+      catalogVersion: (typeof CATALOG !== 'undefined' && CATALOG.version) || '',
+      savedAt: new Date().toISOString(),
+      app: app
+    };
+  }
+
+  function unwrap(payload) {
+    if (payload && payload.app && payload.app.data) { return payload.app; }
+    if (payload && payload.data) { return payload; }
+    return null;
+  }
+
+  function findApp(id) {
+    return state.apps.filter(function (a) { return a.id === id; })[0] || null;
+  }
+
+  function pill(text, kind) {
+    var el = document.getElementById('syncPill');
+    if (!el) { return; }
+    el.textContent = text;
+    el.className = 'sync-pill ' + (kind || 'off');
+  }
+
+  function refreshPill() {
+    if (syncState.conflicts && Object.keys(syncState.conflicts).length) {
+      pill('Sync: ' + Object.keys(syncState.conflicts).length + ' Konflikt(e)', 'bad');
+      return;
+    }
+    if (!syncState.configured) { pill('Sync: nicht eingerichtet', 'off'); return; }
+    if (syncState.demo) {
+      var d = state.apps.filter(isDirty).length;
+      pill(d ? 'Sync: Demo, ' + d + ' offen' : 'Sync: Demo bereit', 'demo');
+      return;
+    }
+    var open = state.apps.filter(isDirty).length;
+    pill(open ? 'Sync: ' + open + ' offen' : 'Sync: bereit', open ? 'warn' : 'ok');
+  }
+
+  /* ---------------- Vorgaenge ---------------- */
+
+  function runCheck() {
+    if (!syncState.owner || !syncState.repo) {
+      log('Eigentuemer und Repository fehlen. Bitte zuerst eintragen.', 'bad');
+      render(); saveState(); return Promise.resolve();
+    }
+    log('Verbindung pruefen: ' + syncState.owner + '/' + syncState.repo + ' (' + (syncState.demo ? 'Demo' : syncState.apiBase) + ')', 'info');
+    syncState.busy = true; render();
+    return getEngine(syncState.demo).check().then(function (r) {
+      syncState.busy = false;
+      if (r.ok) {
+        syncState.configured = true;
+        log('Verbindung steht: ' + r.fullName + ', privat=' + (r.isPrivate ? 'ja' : 'nein') + ', Standardbranch ' + r.defaultBranch, 'ok');
+        if (!isTrusted() && !syncState.demo) {
+          log('Hinweis: Die API-Adresse ist nicht api.github.com. Das Token wird nur an diese Adresse gesendet.', 'warn');
+        }
+      } else {
+        syncState.configured = false;
+        log('Verbindung fehlgeschlagen: ' + r.message, 'bad');
+      }
+      render(); saveState();
+    });
+  }
+
+  /* Einen Bogen hochladen. Ohne bekannte sha wird zuerst gelesen. */
+  function pushApp(id, quiet) {
+    var app = findApp(id);
+    if (!app) { return Promise.resolve(); }
+    var path = appPath(app);
+    var eng = getEngine(syncState.demo);
+    return eng.read(path).then(function (remote) {
+      var knownSha = remote && remote.ok ? remote.sha : null;
+      return eng.write(path, wrap(app), knownSha, 'IST-Aufnahme: ' + appName(app)).then(function (w) {
+        if (w.ok) {
+          syncState.shas[id] = w.sha;
+          syncState.pushedAt[id] = app.meta.localChange || new Date().toISOString();
+          delete syncState.conflicts[id];
+          if (!quiet) { log('Hochgeladen: ' + appName(app) + ' (' + path + ')', 'ok'); }
+        } else if (w.conflict) {
+          syncState.conflicts[id] = { at: new Date().toISOString(), message: w.message };
+          log('Konflikt bei ' + appName(app) + ': ' + w.message, 'bad');
+        } else {
+          log('Fehler beim Hochladen von ' + appName(app) + ': ' + w.message, 'bad');
+        }
+      });
+    }).then(function () { persistDemoStore(); });
+  }
+
+  /* Einen Bogen herunterladen und einmischen. */
+  function pullApp(id, quiet) {
+    var path = window.SyncEngine.buildPath(syncState.folder, id);
+    var eng = getEngine(syncState.demo);
+    return eng.read(path).then(function (r) {
+      if (r.missing) {
+        if (!quiet) { log('Noch nicht im Repository: ' + id, 'info'); }
+        return;
+      }
+      if (!r.ok) { log('Fehler beim Laden von ' + id + ': ' + r.message, 'bad'); return; }
+      var remoteApp = unwrap(r.json);
+      if (!remoteApp) { log('Unbekanntes Format im Repository: ' + path, 'warn'); return; }
+      syncState.shas[id] = r.sha;
+      var local = findApp(id);
+      var remoteChanged = (remoteApp.meta && remoteApp.meta.localChange) || '';
+      var localChanged = (local && local.meta && local.meta.localChange) || '';
+      if (!local) {
+        remoteApp.id = id;
+        state.apps.push(remoteApp);
+        syncState.pushedAt[id] = remoteChanged || new Date().toISOString();
+        log('Neu uebernommen: ' + appName(remoteApp), 'ok');
+      } else if (remoteChanged && remoteChanged > localChanged) {
+        var wasName = appName(local);
+        remoteApp.id = id;
+        var idx = state.apps.indexOf(local);
+        state.apps[idx] = remoteApp;
+        syncState.pushedAt[id] = remoteChanged;
+        delete syncState.conflicts[id];
+        log('Fremde Fassung uebernommen: ' + wasName, 'ok');
+      } else if (!quiet) {
+        log('Lokal ist aktueller oder gleich alt: ' + appName(local), 'info');
+      }
+    }).then(function () { persistDemoStore(); });
+  }
+
+  /* Alles in einem Durchgang: erst holen, dann Offenes hochladen. */
+  function syncAll() {
+    if (!syncState.configured) {
+      log('Bitte zuerst die Verbindung pruefen.', 'warn');
+      render(); return Promise.resolve();
+    }
+    syncState.busy = true;
+    log('Synchronisation gestartet (' + state.apps.length + ' Anwendung(en)).', 'info');
+    render();
+    var eng = getEngine(syncState.demo);
+    var chain = eng.list().then(function (l) {
+      if (!l.ok) { log('Auflisten fehlgeschlagen: ' + l.message, 'bad'); return; }
+      log('Im Datenordner liegen ' + l.files.length + ' Datei(en).', 'info');
+      var ids = l.files.map(function (f) { return f.name.replace(/\.json$/i, ''); });
+      var known = state.apps.map(function (a) { return a.id; });
+      var unknown = ids.filter(function (i) { return known.indexOf(i) < 0; });
+      var seq = Promise.resolve();
+      unknown.forEach(function (id) { seq = seq.then(function () { return pullApp(id, true); }); });
+      state.apps.forEach(function (a) { seq = seq.then(function () { return pullApp(a.id, true); }); });
+      return seq;
+    });
+    return chain.then(function () {
+      var seq = Promise.resolve();
+      state.apps.filter(isDirty).forEach(function (a) {
+        seq = seq.then(function () { return pushApp(a.id, true); });
+      });
+      return seq.then(function () {
+        var hoch = state.apps.filter(isDirty).length;
+        var konf = Object.keys(syncState.conflicts).length;
+        syncState.lastSync = new Date().toISOString();
+        var msg = 'Synchronisation fertig: ' + state.apps.length + ' Anwendung(en), ' + hoch + ' offen' + (konf ? ', ' + konf + ' Konflikt(e)' : '') + '.';
+        log(msg, konf ? 'warn' : 'ok');
+        syncState.busy = false;
+        render(); saveState();
+        if (window.render) { window.render(); }
+      });
+    });
+  }
+
+  function scheduleAutoSync() {
+    if (!syncState.configured || !syncState.auto) { refreshPill(); return; }
+    clearTimeout(runtime.timer);
+    runtime.timer = setTimeout(function () { syncAll(); }, AUTO_DELAY);
+    refreshPill();
+  }
+
+  function loadHistory(id) {
+    syncState.history = { appId: id, loading: true, commits: [] };
+    render();
+    getEngine(syncState.demo).history(window.SyncEngine.buildPath(syncState.folder, id)).then(function (r) {
+      syncState.history = { appId: id, loading: false, commits: r.ok ? r.commits : [], message: r.ok ? '' : r.message };
+      render();
+    });
+  }
+
+  /* Fremde Aenderung nachstellen: nur im Demomodus sinnvoll. */
+  function demoConflict() {
+    var app = state.apps.filter(isDirty)[0] || state.apps[0];
+    if (!app) { return; }
+    var path = appPath(app);
+    var other = window.SyncEngine.create(engineConfig(), { fetchImpl: demoFetch() });
+    other.read(path).then(function (r) {
+      var base = r.ok ? unwrap(r.json) : wrap(app).app;
+      var changed = JSON.parse(JSON.stringify(base));
+      if (!changed.data) { changed.data = {}; }
+      changed.data.bewertungDurchKollegin = 'Am ' + new Date().toLocaleDateString('de-CH') + ' durch zweite Person angepasst (Demo)';
+      changed.meta = changed.meta || {};
+      changed.meta.localChange = new Date(Date.now() + 3600000).toISOString();
+      return other.write(path, wrap(changed), r.ok ? r.sha : null, 'Aenderung durch zweite Person (Demo)');
+    }).then(function () {
+      persistDemoStore();
+      log('Demo: Eine zweite Person hat "' + appName(app) + '" geaendert. Der naechste Upload erzeugt einen Konflikt.', 'warn');
+      return syncAll();
+    });
+  }
+
+  function resolveConflict(id, takeRemote) {
+    var app = findApp(id);
+    if (!app) { return Promise.resolve(); }
+    var path = appPath(app);
+    var eng = getEngine(syncState.demo);
+    return eng.read(path).then(function (r) {
+      if (!r.ok) { log('Fremde Fassung nicht lesbar: ' + r.message, 'bad'); render(); return; }
+      if (takeRemote) {
+        var remoteApp = unwrap(r.json);
+        remoteApp.id = id;
+        var idx = state.apps.indexOf(app);
+        state.apps[idx] = remoteApp;
+        syncState.shas[id] = r.sha;
+        syncState.pushedAt[id] = (remoteApp.meta && remoteApp.meta.localChange) || new Date().toISOString();
+        delete syncState.conflicts[id];
+        log('Fremde Fassung uebernommen: ' + appName(remoteApp), 'ok');
+      } else {
+        syncState.shas[id] = r.sha;
+        return pushApp(id, true).then(function () {
+          delete syncState.conflicts[id];
+          log('Eigene Fassung durchgesetzt: ' + appName(app), 'ok');
+        });
+      }
+    }).then(function () {
+      persistDemoStore();
+      render(); saveState();
+      if (window.render) { window.render(); }
+    });
+  }
+
+  /* ---------------- Selbsttest im Browser ---------------- */
+
+  function selftest() {
+    var results = [];
+    function t(name, cond, detail) { results.push({ name: name, ok: !!cond, detail: detail || '' }); }
+    var store = { files: {}, commits: [], clock: 0 };
+    var f = window.SyncEngine.createDemoFetch(store, { latency: 0 });
+    var cfg = { apiBase: 'https://api.github.com', owner: 'selbsttest', repo: 'probebogen', branch: 'main', folder: 'daten', token: 'demo' };
+    var eng = window.SyncEngine.create(cfg, { fetchImpl: f });
+    var path = window.SyncEngine.buildPath('daten', 'app-probe');
+    var probe = {
+      id: 'app-probe',
+      meta: { catalogVersion: '1.0', formVersion: '2.0', localChange: '2026-09-16T10:00:00.000Z' },
+      data: { anwendungsname: 'Pflegedokumentation (careCoach)', kritikalitaet: '4', begruendung: 'Umlautprobe: Grösse, Erwägungen, Prüfung.' }
+    };
+    var first = null;
+
+    return eng.check().then(function (r) {
+      t('Verbindung pruefen', r.ok, r.ok ? r.fullName : r.message);
+      return eng.list();
+    }).then(function (r) {
+      t('Leerer Datenordner liefert leere Liste', r.ok && r.files.length === 0, 'Dateien: ' + r.files.length);
+      return eng.write(path, { schema: 'ist-aufnahme-neuhaus/v1', app: probe }, null, 'Anlegen');
+    }).then(function (r) {
+      first = r;
+      t('Ersterfassung anlegen (201)', r.ok && r.created === true, 'Status ' + r.status);
+      return eng.read(path);
+    }).then(function (r) {
+      var ok = r.ok && r.json.app.data.begruendung === 'Umlautprobe: Grösse, Erwägungen, Prüfung.';
+      t('Umlaute ueberstehen die Uebertragung', ok, r.ok ? r.json.app.data.begruendung : r.message);
+      return eng.write(path, { schema: 'ist-aufnahme-neuhaus/v1', app: probe }, first.sha, 'Aktualisieren');
+    }).then(function (r) {
+      t('Aktualisieren mit gueltiger sha (200)', r.ok, 'Status ' + r.status);
+      return eng.write(path, { schema: 'ist-aufnahme-neuhaus/v1', app: probe }, first.sha, 'Veraltete Fassung');
+    }).then(function (r) {
+      t('Veraltete sha ergibt Konflikt (409)', r.ok === false && r.conflict === true, 'Status ' + r.status);
+      return eng.write(path, { schema: 'ist-aufnahme-neuhaus/v1', app: probe }, null, 'Ohne sha');
+    }).then(function (r) {
+      t('Ueberschreiben ohne sha wird abgelehnt (422)', r.ok === false, 'Status ' + r.status);
+      return eng.history(path);
+    }).then(function (r) {
+      t('Verlauf wird geliefert', r.ok && r.commits.length >= 2, r.ok ? r.commits.length + ' Commits' : r.message);
+      return eng.list();
+    }).then(function (r) {
+      t('Ordner listet den Bogen', r.ok && r.files.length === 1, r.ok ? r.files[0].name : r.message);
+      return eng.remove(path, store.files[path].sha, 'Entfernen');
+    }).then(function (r) {
+      t('Entfernen gelingt', r.ok, 'Status ' + r.status);
+      var failed = results.filter(function (x) { return !x.ok; }).length;
+      syncState.selftest = { at: new Date().toISOString(), results: results, failed: failed };
+      log('Selbsttest abgeschlossen: ' + (results.length - failed) + ' von ' + results.length + ' Pruefungen bestanden.', failed ? 'bad' : 'ok');
+      render();
+    }).catch(function (err) {
+      syncState.selftest = { at: new Date().toISOString(), results: results, failed: results.length + 1, message: String(err) };
+      log('Selbsttest abgebrochen: ' + err, 'bad');
+      render();
+    });
+  }
+
+  /* ---------------- Darstellung ---------------- */
+
+  function statusOf(app) {
+    if (syncState.conflicts[app.id]) { return { key: 'konflikt', label: 'Konflikt' }; }
+    if (!syncState.pushedAt[app.id]) { return { key: 'neu', label: 'nicht im Repository' }; }
+    if (isDirty(app)) { return { key: PENDING, label: 'lokal geaendert' }; }
+    return { key: 'ok', label: 'synchron' };
+  }
+
+  function render() {
+    var host = document.getElementById('viewSync');
+    if (!host) { return; }
+    var cfg = engineConfig();
+    var conflicts = Object.keys(syncState.conflicts);
+    var offen = state.apps.filter(isDirty).length;
+
+    var h = '';
+
+    h += '<div class="card"><h2>Synchronisation ueber GitHub</h2>' +
+      '<p class="intro">Jeder Erfassungsbogen liegt als JSON-Datei in einem Repository. Die App liest und schreibt direkt ueber die GitHub-Schnittstelle; jede Speicherung wird dort zu einem Commit mit Verlauf und Wiederherstellung.</p>' +
+      '<div class="help-panel"><h4>Vor dem ersten Einsatz</h4>' +
+      '<p>Legen Sie ein <strong>privates</strong> Repository nur fuer die Daten an, getrennt vom oeffentlichen App-Repository. Erstellen Sie ein fein granuliertes Token mit der Berechtigung <strong>Contents: Read and write</strong>, begrenzt auf dieses eine Repository.</p>' +
+      '<p class="small">Das Token wird ausschliesslich an die unten eingetragene Adresse gesendet und bleibt im Browser gespeichert. Es steht in keiner exportierten Datei und in keinem Ausdruck. Bei Verlust: Token bei GitHub widerrufen und neu erzeugen.</p></div>';
+
+    h += '<div class="sync-row"><label class="sync-switch"><input type="checkbox" data-sync="demo"' + (syncState.demo ? ' checked' : '') + '> Demo-Modus (ohne GitHub-Konto erlebbar)</label>' +
+      '<label class="sync-switch"><input type="checkbox" data-sync="auto"' + (syncState.auto ? ' checked' : '') + '> automatisch synchronisieren</label>' +
+      '<button class="btn btn-secondary btn-sm" data-act="demo-reset">Demo zuruecksetzen</button>' +
+      '<button class="btn btn-secondary btn-sm" data-act="demo-conflict">Konflikt erzeugen (Demo)</button></div>';
+
+    h += '<div class="sync-grid">' +
+      field('owner', 'Eigentuemer', cfg.owner, 'GitHub-Benutzername oder Organisation') +
+      field('repo', 'Repository (Daten)', cfg.repo, 'z. B. ist-aufnahme-daten, privat') +
+      field('folder', 'Datenordner', cfg.folder, 'Unterordner im Repository, z. B. daten') +
+      field('branch', 'Branch', cfg.branch, 'meist main') +
+      field('apiBase', 'API-Adresse', cfg.apiBase, 'fuer echten Betrieb https://api.github.com') +
+      '<div class="field"><label>Token (Contents: Read and write)</label><span class="hint">wird nur an die eingetragene Adresse gesendet, nie exportiert</span>' +
+      '<input type="password" data-sync="token" value="' + escapeHtml(cfg.token) + '" placeholder="github_pat_... oder ghp_..." autocomplete="off"></div>' +
+      '</div>';
+
+    if (!isTrusted() && !syncState.demo) {
+      h += '<div class="help-panel" style="border-left-color:#b03a2e;background:#fbe9e7;"><p class="small">Achtung: Die API-Adresse ist nicht api.github.com. Pruefen Sie, dass Sie dieser Adresse das Token anvertrauen wollen.</p></div>';
+    }
+
+    h += '<div class="sync-row" style="margin-top:0.8rem;">' +
+      '<button class="btn btn-primary" data-act="check">Verbindung pruefen</button>' +
+      '<button class="btn btn-primary" data-act="sync"' + (syncState.busy ? ' disabled' : '') + '>' + (syncState.busy ? 'laeuft...' : 'Jetzt synchronisieren') + '</button>' +
+      '<button class="btn btn-secondary" data-act="pull-all">Alles neu laden</button>' +
+      '<button class="btn btn-secondary" data-act="token-clear">Token loeschen</button>' +
+      '<button class="btn btn-secondary" data-act="selftest">Selbsttest</button>' +
+      '</div>';
+
+    h += '<p class="status-bar" style="margin-top:0.7rem;">' + (syncState.configured ? 'Verbindung eingerichtet' : 'Noch nicht verbunden') +
+      ' &middot; letzte Synchronisation: ' + fmt(syncState.lastSync) +
+      ' &middot; lokal geaendert: ' + offen +
+      (syncState.demo ? ' &middot; Modus: Demo (Speicher nur in diesem Browser)' : '') + '</p>';
+    h += '</div>';
+
+    /* Konflikte */
+    if (conflicts.length) {
+      h += '<div class="card" style="border-left:4px solid var(--danger);"><h2>Konflikte</h2><p class="intro">Im Repository liegt eine neuere Fassung. Bitte entscheiden, welche Fassung gilt.</p>';
+      conflicts.forEach(function (id) {
+        var app = findApp(id);
+        h += '<div class="conflict-row"><div><strong>' + escapeHtml(app ? appName(app) : id) + '</strong>' +
+          '<div class="status-bar">' + escapeHtml(syncState.conflicts[id].message || '') + ' &middot; ' + fmt(syncState.conflicts[id].at) + '</div></div>' +
+          '<div><button class="btn btn-secondary btn-sm" data-act="take-remote" data-id="' + id + '">Fremde Fassung uebernehmen</button> ' +
+          '<button class="btn btn-danger btn-sm" data-act="force-local" data-id="' + id + '">Meine Fassung durchsetzen</button></div></div>';
+      });
+      h += '</div>';
+    }
+
+    /* Anwendungen */
+    h += '<div class="card"><h2>Stand je Anwendung</h2>';
+    if (!state.apps.length) { h += '<p class="intro">Noch keine Anwendung erfasst.</p>'; }
+    else {
+      h += '<div class="matrix-wrap"><table class="matrix"><thead><tr>' +
+        '<th>Anwendung</th><th>Zustand</th><th>Vollstaendigkeit</th><th>Datei</th><th>Letzte Uebertragung</th><th></th>' +
+        '</tr></thead><tbody>';
+      state.apps.forEach(function (app) {
+        var st = statusOf(app);
+        var c = completeness(app);
+        h += '<tr><td><strong>' + escapeHtml(appName(app)) + '</strong></td>' +
+          '<td><span class="sync-badge ' + st.key + '">' + st.label + '</span></td>' +
+          '<td>' + c.pct + ' %</td>' +
+          '<td class="mono">' + escapeHtml(appPath(app)) + '</td>' +
+          '<td>' + fmt(syncState.pushedAt[app.id]) + '</td>' +
+          '<td class="nowrap">' +
+            '<button class="btn btn-secondary btn-sm" data-act="push" data-id="' + app.id + '">Hochladen</button> ' +
+            '<button class="btn btn-secondary btn-sm" data-act="pull" data-id="' + app.id + '">Laden</button> ' +
+            '<button class="btn btn-secondary btn-sm" data-act="history" data-id="' + app.id + '">Verlauf</button>' +
+          '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    h += '</div>';
+
+    /* Verlauf */
+    if (syncState.history) {
+      var app = findApp(syncState.history.appId);
+      h += '<div class="card"><h2>Verlauf: ' + escapeHtml(app ? appName(app) : syncState.history.appId) + '</h2>';
+      if (syncState.history.loading) { h += '<p class="intro">wird geladen...</p>'; }
+      else if (!syncState.history.commits.length) { h += '<p class="intro">Kein Verlauf vorhanden. ' + escapeHtml(syncState.history.message || '') + '</p>'; }
+      else {
+        h += '<table class="matrix"><thead><tr><th>Commit</th><th>Zeitpunkt</th><th>Person</th><th>Nachricht</th></tr></thead><tbody>';
+        syncState.history.commits.forEach(function (c) {
+          h += '<tr><td class="mono">' + escapeHtml(c.shortSha) + '</td><td>' + fmt(c.date) + '</td><td>' + escapeHtml(c.author) + '</td><td>' + escapeHtml(c.message) + '</td></tr>';
+        });
+        h += '</tbody></table><p class="status-bar" style="margin-top:0.6rem;">Im echten Repository fuehrt jeder Eintrag zur vollstaendigen Fassung; ein frueherer Stand laesst sich dort jederzeit wiederherstellen.</p>';
+      }
+      h += '<div style="margin-top:0.6rem;"><button class="btn btn-secondary btn-sm" data-act="history-close">Verlauf schliessen</button></div></div>';
+    }
+
+    /* Selbsttest */
+    if (syncState.selftest) {
+      var st2 = syncState.selftest;
+      h += '<div class="card"><h2>Selbsttest</h2><p class="intro">Prueft den Sync-Kern im Browser gegen einen nachgebildeten Repository-Speicher. Ausgefuehrt am ' + fmt(st2.at) + '.</p>';
+      h += '<table class="matrix"><tbody>';
+      st2.results.forEach(function (r) {
+        h += '<tr><td style="width:4rem;"><span class="sync-badge ' + (r.ok ? 'ok' : 'konflikt') + '">' + (r.ok ? 'PASS' : 'FAIL') + '</span></td><td>' + escapeHtml(r.name) + '</td><td class="status-bar">' + escapeHtml(r.detail) + '</td></tr>';
+      });
+      h += '</tbody></table><p class="status-bar" style="margin-top:0.6rem;">' + (st2.results.length - st2.failed) + ' von ' + st2.results.length + ' Pruefungen bestanden.' + (st2.message ? ' ' + escapeHtml(st2.message) : '') + '</p>';
+      h += '<div style="margin-top:0.6rem;"><button class="btn btn-secondary btn-sm" data-act="selftest-close">Ergebnis schliessen</button></div></div>';
+    }
+
+    /* Protokoll */
+    h += '<div class="card"><h2>Protokoll</h2>';
+    if (!syncState.log.length) { h += '<p class="intro">Noch keine Eintraege.</p>'; }
+    else {
+      h += '<div class="sync-log">';
+      syncState.log.slice(0, 25).forEach(function (e) {
+        h += '<div class="sync-log-row ' + e.kind + '"><span class="t">' + fmt(e.at) + '</span><span>' + escapeHtml(e.text) + '</span></div>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
+
+    host.innerHTML = h;
+    refreshPill();
+  }
+
+  function field(key, label, value, hint) {
+    var type = key === 'token' ? 'password' : 'text';
+    return '<div class="field"><label>' + label + '</label><span class="hint">' + hint + '</span>' +
+      '<input type="' + type + '" data-sync="' + key + '" value="' + escapeHtml(value || '') + '" autocomplete="off"></div>';
+  }
+
+  /* ---------------- Einbindung ---------------- */
+
+  function setConfigValue(key, value) {
+    if (key === 'token') { syncState.token = value; saveState(); return; }
+    syncState[key] = value;
+    if (key === 'apiBase' || key === 'branch' || key === 'folder') {
+      syncState.shas = {};
+      syncState.pushedAt = {};
+      resetRuntime();
+      log('Einstellung "' + key + '" geaendert. Bitte Verbindung neu pruefen.', 'info');
+    }
+    saveState();
+    refreshPill();
+  }
+
+  function handleClick(e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) { return; }
+    var act = btn.getAttribute('data-act');
+    var id = btn.getAttribute('data-id');
+    if (act === 'check') { runCheck(); }
+    else if (act === 'sync') { syncAll(); }
+    else if (act === 'pull-all') { syncAll(); }
+    else if (act === 'push') { pushApp(id, false).then(function () { render(); saveState(); if (window.render) { window.render(); } }); }
+    else if (act === 'pull') { pullApp(id, false).then(function () { render(); saveState(); if (window.render) { window.render(); } }); }
+    else if (act === 'history') { loadHistory(id); }
+    else if (act === 'history-close') { syncState.history = null; render(); }
+    else if (act === 'take-remote') { resolveConflict(id, true); }
+    else if (act === 'force-local') { resolveConflict(id, false); }
+    else if (act === 'selftest') { selftest(); }
+    else if (act === 'selftest-close') { syncState.selftest = null; render(); }
+    else if (act === 'token-clear') { syncState.token = ''; syncState.configured = false; saveState(); log('Token geloescht.', 'info'); render(); }
+    else if (act === 'demo-reset') {
+      resetRuntime();
+      try { localStorage.removeItem(DEMO_KEY); } catch (err) {}
+      syncState.shas = {}; syncState.pushedAt = {}; syncState.conflicts = {};
+      log('Demo-Speicher geleert. Die Anwendungen bleiben lokal erhalten.', 'info');
+      render(); saveState();
+    }
+    else if (act === 'demo-conflict') { demoConflict(); }
+  }
+
+  function handleInput(e) {
+    var el = e.target.closest('[data-sync]');
+    if (!el) { return; }
+    var key = el.getAttribute('data-sync');
+    if (key === 'demo') {
+      syncState.demo = el.checked;
+      resetRuntime();
+      saveState();
+      log(el.checked ? 'Demo-Modus aktiv. Alles laeuft gegen einen Speicher in diesem Browser.' : 'Demo-Modus aus. Es gilt die eingetragene API-Adresse.', 'info');
+      render();
+      return;
+    }
+    if (key === 'auto') { syncState.auto = el.checked; saveState(); refreshPill(); return; }
+    setConfigValue(key, el.value);
+  }
+
+  function mount() {
+    if (runtime.mounted) { return; }
+    var host = document.getElementById('viewSync');
+    if (!host) { return; }
+    loadState();
+    host.addEventListener('click', handleClick);
+    host.addEventListener('input', handleInput);
+    host.addEventListener('change', handleInput);
+    runtime.mounted = true;
+    render();
+  }
+
+  window.SyncUI = {
+    mount: mount,
+    render: function () { if (runtime.mounted) { render(); } else { mount(); } },
+    scheduleAutoSync: function () { if (runtime.mounted) { scheduleAutoSync(); } },
+    state: function () { return syncState; }
+  };
+
+  window.addEventListener('DOMContentLoaded', function () {
+    setTimeout(mount, 0);
+  });
+})();
+
+</script>
+<script>
+const CATALOG = {"version":"1.0","validFrom":"2026-09-16","domain":"wohnpflege","organisation":"Stiftung Neuhaus, Wängi","instrument":"IST-Aufnahme der Anwendungen – Wohn- und Pflegezentrum","note":"Referenzkatalog für ein Wohn- und Pflegezentrum. Die Spalte «Typische Systeme/Betriebsmittel» nennt branchenübliche Lösungen als Orientierung und ist keine Aussage über den tatsächlichen Einsatz im Betrieb.","level1":[{"id":"NEUH-01","name":"Bewohneraufnahme und Belegung","purpose":"Steuert Anfragen, Eintritte, Zimmerbelegung und die Taxeinstufung der Bewohnerinnen und Bewohner.","level2":[{"id":"NEUH-01.01","name":"Anfrage- und Aufnahmemanagement","description":"Nimmt Anfragen entgegen, führt Wartelisten und koordiniert Eintritte.","systems":"","level3":[{"id":"NEUH-01.01.01","name":"Anfrage und Warteliste","description":"Erfasst Anfragen von Angehörigen, Spitälern und Gemeinden und führt die Warteliste nach Dringlichkeit.","systems":"Excel-Warteliste; Telefonnotizen; E-Mail-Postfach Sekretariat"},{"id":"NEUH-01.01.02","name":"Platzzusage und Eintrittsvereinbarung","description":"Erstellt Eintrittsvereinbarung, Kostengutsprache und Orientierung der Angehörigen.","systems":"Word-Vorlagen; Bewohneradministration (z. B. heim.NET)"},{"id":"NEUH-01.01.03","name":"Eintrittskoordination und Übertritt","description":"Koordiniert Übertritte aus Spital oder Zuhause, Zimmerbereitschaft und Erstgespräch.","systems":"Pflegedokumentation (z. B. careCoach, myneva.swing, easyDOK); Telefon/E-Mail"}]},{"id":"NEUH-01.02","name":"Zimmer- und Belegungsmanagement","description":"Verwaltet Zimmer, Betten und Belegungswechsel.","systems":"","level3":[{"id":"NEUH-01.02.01","name":"Zimmer- und Bettenbelegung","description":"Führt den Belegungsplan über Zimmer, Abteilungen und Bettenstände.","systems":"Bewohneradministration; Belegungsliste Excel; Stationsrapport"},{"id":"NEUH-01.02.02","name":"Umzug, Wechsel und Austritt","description":"Regelt interne Umzüge, Abteilungswechsel und Austritte inklusive Rückgabe von Effekten.","systems":"Bewohneradministration; Rapporte; Checklisten Word"}]},{"id":"NEUH-01.03","name":"Pflegebedarfsabklärung und Taxeinstufung","description":"Erhebt den Pflegebedarf und leitet daraus Taxen und Kostengutsprachen ab.","systems":"","level3":[{"id":"NEUH-01.03.01","name":"Bedarfsabklärung und Assessment","description":"Erhebt Pflege- und Betreuungsbedarf strukturiert mit einem Assessmentinstrument.","systems":"interRAI (HC/CMH); RAI-NH; BESA; Assessmentmodul der Pflegedokumentation"},{"id":"NEUH-01.03.02","name":"Taxeinstufung und Kostengutsprache","description":"Leitet Pflegestufe und Taxen ab und klärt Kostengutsprache mit Krankenkasse, Gemeinde und EL-Stelle.","systems":"Bewohneradministration; EL-Rechner AHV/IV; Gemeindeformulare"},{"id":"NEUH-01.03.03","name":"Tages-, Ferien- und Kurzzeitaufenthalte","description":"Führt Plätze für Tagesaufenthalter sowie Ferien- und Kurzzeitbetten.","systems":"Sekretariatsliste; Bewohneradministration; telefonische Reservation"}]}]},{"id":"NEUH-02","name":"Pflegeprozess und Pflegedokumentation","purpose":"Führt den Pflegeprozess von der Planung über die Dokumentation bis zur Evaluation nachvollziehbar.","level2":[{"id":"NEUH-02.01","name":"Pflegeplanung und Dokumentation","description":"Plant, dokumentiert und evaluiert die individuelle Pflege.","systems":"","level3":[{"id":"NEUH-02.01.01","name":"Pflegeassessment und Pflegeplanung","description":"Erstellt die individuelle Pflegeplanung aus Assessment und Pflegediagnosen.","systems":"Pflegedokumentation (careCoach, myneva.swing, easyDOK); Pflegemodelle ATL/AEDL/NANDA"},{"id":"NEUH-02.01.02","name":"Pflegedokumentation und Tagesbericht","description":"Dokumentiert erbrachte Pflege, Beobachtungen und Abweichungen im Verlauf.","systems":"Pflegedokumentation mobil am Tablet; Papier-Kurvenblatt als Rückfallebene"},{"id":"NEUH-02.01.03","name":"Massnahmen- und Leistungserfassung","description":"Erfasst Pflegemassnahmen und Leistungen als Grundlage der Abrechnung.","systems":"Pflegedokumentation; Leistungskatalog; Schnittstelle zur Fakturierung"},{"id":"NEUH-02.01.04","name":"Verlaufsbewertung und Evaluation","description":"Überprüft Pflegeziele und passt Massnahmen an (Pflegevisite, Fallbesprechung).","systems":"Pflegedokumentation; Protokolle der Fallbesprechung Word"}]},{"id":"NEUH-02.02","name":"Vitalwerte, Risiken und Assessments","description":"Erhebt Messwerte und Risiken als Grundlage der Planung.","systems":"","level3":[{"id":"NEUH-02.02.01","name":"Vitalwerte und Messreihen","description":"Erfasst Blutdruck, Puls, Temperatur, Gewicht und Blutzucker als Verlauf.","systems":"Pflegedokumentation; Messgeräte mit Übertragung; Excel-Tabellen"},{"id":"NEUH-02.02.02","name":"Risikoassessments","description":"Beurteilt Sturz-, Dekubitus-, Ernährungs- und Thromboserisiko.","systems":"Skalen Braden, Norton, Sturzrisiko; Pflegedokumentation"},{"id":"NEUH-02.02.03","name":"Wund- und Schmerzdokumentation","description":"Dokumentiert Wunden, Verbände und Schmerzverläufe mit Bildern und Messwerten.","systems":"Wunddokumentation mit Fotofunktion; Pflegedokumentation; Wundkonsil"}]},{"id":"NEUH-02.03","name":"Palliative Pflege und Abschiedskultur","description":"Begleitet palliative Situationen und gestaltet das Abschiednehmen.","systems":"","level3":[{"id":"NEUH-02.03.01","name":"Palliative Situation und Vorausplanung","description":"Begleitet palliative Situationen und führt Patientenverfügung und Notfallplan.","systems":"Merkblatt Palliative Pflege; Patientenverfügung; Pflegedokumentation"},{"id":"NEUH-02.03.02","name":"Verstorbene und Abschiedskultur","description":"Regelt Sterbebegleitung, Abschiednehmen, Angehörigenbetreuung und Formalitäten.","systems":"Todesfallcheckliste; Formulare Zivilstand/Bestattung; Pflegedokumentation"}]}]},{"id":"NEUH-03","name":"Medikation und medizinische Behandlung","purpose":"Sichert Verordnung, Stellen, Verabreichen und Dokumentation der Medikation.","level2":[{"id":"NEUH-03.01","name":"Medikamentenprozess","description":"Führt die Medikation von der Verordnung bis zur Gabe.","systems":"","level3":[{"id":"NEUH-03.01.01","name":"Medikamentenplan und Verordnung","description":"Führt Verordnungen, Änderungen und Interaktionshinweise je Bewohnerin oder Bewohner.","systems":"Pflegedokumentation; Arztverordnung; Arzneimitteldaten (HCI-Index)"},{"id":"NEUH-03.01.02","name":"Stellen, Verabreichen und Verblisterung","description":"Stellt Medikamente, verabreicht sie und dokumentiert die Gabe.","systems":"Verblisterung durch Apotheke (z. B. MediBlist, Bähler Dropa); Medikamentenschrank; Pflegedokumentation"},{"id":"NEUH-03.01.03","name":"Betäubungsmittel und Notfallmedikation","description":"Verwaltet Betäubungsmittel, Notfallkoffer und Bestände mit Nachweis.","systems":"Betäubungsmittelbuch; Notfallkoffer-Checkliste; Apothekenbestellung"}]},{"id":"NEUH-03.02","name":"Ärztliche Zusammenarbeit und Therapien","description":"Koordiniert Ärztinnen, Ärzte und Therapiedienste.","systems":"","level3":[{"id":"NEUH-03.02.01","name":"Arztvisite und hausärztliche Betreuung","description":"Koordiniert Visiten, Anordnungen und Rückfragen der Hausärztinnen und Hausärzte.","systems":"Telefon/E-Mail; Visitenblatt; Pflegedokumentation"},{"id":"NEUH-03.02.02","name":"Therapien und Hilfsmittel","description":"Organisiert Physio-, Ergo- und Logopädietherapien sowie Hilfsmittel.","systems":"Therapiepläne; Terminkalender; Hilfsmittelverwaltung"},{"id":"NEUH-03.02.03","name":"Ein- und Austritte mit Spital","description":"Übernimmt Spitalaustrittsberichte, Medikationslisten und Rückübernahmen.","systems":"Austrittsbericht als PDF oder Fax; Pflegedokumentation; E-Mail"}]}]},{"id":"NEUH-04","name":"Betreuung, Aktivierung und Alltagsgestaltung","purpose":"Gestaltet den Alltag, fördert Teilhabe und begleitet psychosozial.","level2":[{"id":"NEUH-04.01","name":"Aktivierung und Beschäftigung","description":"Plant und führt das Aktivierungsprogramm durch.","systems":"","level3":[{"id":"NEUH-04.01.01","name":"Wochenprogramm und Planung","description":"Plant das wöchentliche Aktivierungsprogramm und publiziert es.","systems":"Word-Programm; Aushang Lift; PDF auf der Website"},{"id":"NEUH-04.01.02","name":"Gruppen- und Einzelaktivitäten","description":"Führt Malatelier, Kochklub, Bewegungskreis, Denk dich fit, Singen und Neuhaus-Kiosk durch.","systems":"Aktivierungsplanung; Bewohner-Atelier (BeA); Materiallisten"},{"id":"NEUH-04.01.03","name":"Ausflüge und Anlässe","description":"Organisiert Ausflüge, Konzerte, Vorträge und Feste.","systems":"Busreservation; Anmeldelisten; Spendenfonds Bewohnende"}]},{"id":"NEUH-04.02","name":"Psychosoziale Betreuung","description":"Begleitet Bewohnende in schwierigen Lebenslagen.","systems":"","level3":[{"id":"NEUH-04.02.01","name":"Begleitung und Gespräche","description":"Begleitet Bewohnende in Krisen, bei Verlust und in schwierigen Lebenslagen.","systems":"Gesprächsprotokolle; Pflegedokumentation; Seelsorge"},{"id":"NEUH-04.02.02","name":"Demenz und herausforderndes Verhalten","description":"Gestaltet den Alltag bei Demenz und dokumentiert herausforderndes Verhalten.","systems":"Assessmentinstrumente; Pflegedokumentation; Milieugestaltung"},{"id":"NEUH-04.02.03","name":"Mitwirkung der Bewohnenden","description":"Ermöglicht Mitwirkung und Rückmeldungen der Bewohnenden.","systems":"Sitzungsprotokolle; Rückmeldeformular"}]},{"id":"NEUH-04.03","name":"Freiwilligenarbeit und Besuchsdienst","description":"Gewinnt, begleitet und plant freiwillige Helferinnen und Helfer.","systems":"","level3":[{"id":"NEUH-04.03.01","name":"Freiwilligenkoordination","description":"Gewinnt, begleitet und plant den Einsatz freiwilliger Helferinnen und Helfer.","systems":"Einsatzplan Excel; Freiwilligenliste; Ansprechperson Aktivierung"},{"id":"NEUH-04.03.02","name":"Besuchsdienst und Jassnachmittag","description":"Organisiert Besuchsdienst sowie Spiel- und Jassnachmittage.","systems":"Terminplan; Telefon; Aushang"},{"id":"NEUH-04.03.03","name":"Anerkennung und gemeinsame Anlässe","description":"Dankt Freiwilligen und führt gemeinsame Anlässe durch.","systems":"Freiwilligenbudget; Einladungen Word"}]}]},{"id":"NEUH-05","name":"Verpflegung und Gastronomie","purpose":"Versorgt Bewohnende und Gäste mit Mahlzeiten und betreibt die Gastronomie.","level2":[{"id":"NEUH-05.01","name":"Menüplanung und Speisenversorgung","description":"Plant Menüs und stellt die Versorgung sicher.","systems":"","level3":[{"id":"NEUH-05.01.01","name":"Menüplanung und Rezepturen","description":"Plant den Menüplan, kalkuliert Rezepturen und bestellt Lebensmittel.","systems":"Menüplanungssoftware; Excel-Rezepturen; Bestellung per E-Mail"},{"id":"NEUH-05.01.02","name":"Kostformen und Diäten","description":"Berücksichtigt Diäten, Allergien, Dysphagie und Wunschkost.","systems":"Diätliste; Dysphagie-Kostformen; Küchendokumentation"},{"id":"NEUH-05.01.03","name":"Bestellung und Tablettverteilung","description":"Nimmt Bestellungen der Bewohnenden auf und verteilt die Tabletts.","systems":"Bestellliste pro Station; Tablettwagen; Stationsrapport"}]},{"id":"NEUH-05.02","name":"Restaurant kafi ziitlos und Mittagstisch","description":"Betreibt Restaurant, Mittagstisch und Gästebewirtung.","systems":"","level3":[{"id":"NEUH-05.02.01","name":"Essensreservationen","description":"Nimmt telefonische Reservationen bis 09.30 Uhr entgegen und plant Tische.","systems":"Reservationsbuch; Telefon Sekretariat; Menüplan PDF/Website"},{"id":"NEUH-05.02.02","name":"Kiosk und Barbetrag","description":"Betreibt den Neuhaus-Kiosk und verrechnet über den Barbetrag.","systems":"Kassabuch; Barbetragskonto der Bewohnenden"},{"id":"NEUH-05.02.03","name":"Gäste- und Anlassgastronomie","description":"Bewirtet Gäste, Vereine und Anlässe.","systems":"Saalmiete-Dokumentation; Bankettdokumentation; Offerten Word"}]},{"id":"NEUH-05.03","name":"Anlässe, Saal und Vermietung","description":"Vermietet den Mehrzwecksaal und organisiert Festlichkeiten.","systems":"","level3":[{"id":"NEUH-05.03.01","name":"Saalvermietung und Belegungsplan","description":"Vermietet den Mehrzwecksaal und führt den Belegungsplan.","systems":"Saalmiete-Vertrag; Belegungskalender"},{"id":"NEUH-05.03.02","name":"Leidmahl und Festlichkeiten","description":"Organisiert Leidmahle, Geburtstage und Familienanlässe.","systems":"Bankettdokumentation; Offerten; Rechnungsstellung"}]},{"id":"NEUH-05.04","name":"Lebensmittelhygiene und Deklaration","description":"Sichert Hygiene und Kennzeichnung.","systems":"","level3":[{"id":"NEUH-05.04.01","name":"HACCP und Küchenhygiene","description":"Führt Hygienekonzept, Temperaturkontrollen und Reinigungsplan der Küche.","systems":"HACCP-Ordner; Temperaturprotokolle; Reinigungsplan"},{"id":"NEUH-05.04.02","name":"Deklaration und Allergene","description":"Deklariert Inhaltsstoffe, Allergene und Nährwerte.","systems":"Lebensmitteldeklaration PDF; Rezepturdatenbank"}]}]},{"id":"NEUH-06","name":"Hauswirtschaft, Hotellerie und Wäsche","purpose":"Hält Haus, Wäsche und Wohnkomfort in Ordnung.","level2":[{"id":"NEUH-06.01","name":"Reinigung und Hausdienst","description":"Reinigt und unterhält Gebäude und Zimmer.","systems":"","level3":[{"id":"NEUH-06.01.01","name":"Reinigungsplan und Zimmerreinigung","description":"Reinigt Zimmer, Nasszellen und Gemeinschaftsräume nach Plan.","systems":"Reinigungsplan; Leistungsverzeichnis; externe Reinigungsfirma"},{"id":"NEUH-06.01.02","name":"Wäsche und Textilbewirtschaftung","description":"Bewirtschaftet Bewohner-, Haus- und Berufswäsche.","systems":"Waschküchenanlage; Wäscheliste; Textilbestand"}]},{"id":"NEUH-06.02","name":"Hotellerie und Wohnkomfort","description":"Sorgt für Ausstattung und Zusatzdienste.","systems":"","level3":[{"id":"NEUH-06.02.01","name":"Zimmerausstattung und Effekten","description":"Unterhält Zimmereinrichtung, Inventar und persönliche Effekten.","systems":"Inventarliste; Übergabeprotokoll; Bewohneradministration"},{"id":"NEUH-06.02.02","name":"Coiffure, Pedicure und Drittdienste","description":"Koordiniert Coiffure- und Pedicure-Angebote im Haus.","systems":"Terminbuch; Verrechnung über Barbetrag"}]},{"id":"NEUH-06.03","name":"Betriebsmittel und Ökologie","description":"Bewirtschaftet Material und Entsorgung.","systems":"","level3":[{"id":"NEUH-06.03.01","name":"Material und Verbrauchsgüter","description":"Beschafft Verbrauchsmaterial und führt die Bestände.","systems":"Bestelllisten Excel; Lieferantenbestellung; Lagerbewirtschaftung"},{"id":"NEUH-06.03.02","name":"Abfall und Ökologie","description":"Regelt Abfallentsorgung, Recycling und Umweltmassnahmen.","systems":"Entsorgungskonzept; Lieferantenabholung; kantonale Vorgaben"}]}]},{"id":"NEUH-07","name":"Infrastruktur, Technik und Liegenschaften","purpose":"Hält Gebäude, Anlagen und Aussenraum betriebsbereit und sicher.","level2":[{"id":"NEUH-07.01","name":"Gebäude und Anlagen","description":"Unterhält Liegenschaft und technische Anlagen.","systems":"","level3":[{"id":"NEUH-07.01.01","name":"Gebäudeunterhalt und Instandhaltung","description":"Plant und dokumentiert Unterhalt, Reparaturen und Sanierungen.","systems":"Instandhaltungsplan Excel; Aufgabenliste Technischer Dienst; Handwerker-Offerten"},{"id":"NEUH-07.01.02","name":"Haustechnik und Anlagen","description":"Betreibt Heizung, Lüftung, Sanitär, Elektro, Aufzug und Anlagen.","systems":"Gebäudeleittechnik; Wartungsverträge; Anlagenliste"},{"id":"NEUH-07.01.03","name":"Park, Aussenanlagen und Tiere","description":"Unterhält Park, Wege, Weiher, Weiden und die Tierhaltung.","systems":"Unterhaltsplan; Tierlisten; Gartendienst"}]},{"id":"NEUH-07.02","name":"Sicherheit und Notfälle","description":"Sichert Personen und Gebäude.","systems":"","level3":[{"id":"NEUH-07.02.01","name":"Brandschutz und Notfallorganisation","description":"Führt Brandschutzkonzept, Übungen und Evakuationsplanung.","systems":"Brandschutzakten; Gebäudeversicherung; Übungsprotokolle"},{"id":"NEUH-07.02.02","name":"Personenruf und Sicherheitsanlagen","description":"Betreibt Notruf-, Tür- und Zutrittssysteme sowie den Aufzug.","systems":"Personenrufanlage DECT; Schliessanlage; Liftnotruf"}]},{"id":"NEUH-07.03","name":"Mobilität und Transporte","description":"Organisiert Fahrzeuge und Transporte.","systems":"","level3":[{"id":"NEUH-07.03.01","name":"Fahrzeuge und Transporte","description":"Bewirtschaftet Hausfahrzeuge und organisiert Transporte.","systems":"Fahrtenbuch; Fahrzeugliste; Reservation"},{"id":"NEUH-07.03.02","name":"Ausflugs- und Besuchertransporte","description":"Organisiert Transporte für Ausflüge, Therapien und Besuche.","systems":"Taxi- und Busreservation; Terminplanung Aktivierung"}]}]},{"id":"NEUH-08","name":"Bewohneradministration und Finanzen","purpose":"Führt Bewohnerdaten, Taxen, Rechnungen und die Finanzen der Stiftung.","level2":[{"id":"NEUH-08.01","name":"Bewohnerstammdaten","description":"Führt Personalien und Bezugspersonen.","systems":"","level3":[{"id":"NEUH-08.01.01","name":"Bewohnerstammdaten und Adressen","description":"Führt Personalien, Zivilstand, Versicherungen und Kontaktdaten.","systems":"Bewohneradministration (z. B. heim.NET, myneva.swing); Adressverwaltung"},{"id":"NEUH-08.01.02","name":"Angehörige, Vertretung und Vollmachten","description":"Führt Angehörige, Bevollmächtigte und Vertretungsregelungen.","systems":"Bewohneradministration; Vollmachtsformulare; Kontaktlisten"}]},{"id":"NEUH-08.02","name":"Taxen und Fakturierung","description":"Rechnet Leistungen ab und verfolgt die Finanzierung.","systems":"","level3":[{"id":"NEUH-08.02.01","name":"Taxordnung und Taxen","description":"Pflegt Taxen für Pension, Betreuung, Pflege und Nebenkosten.","systems":"Taxordnung PDF; Bewohneradministration; Excel-Kalkulation"},{"id":"NEUH-08.02.02","name":"Rechnungsstellung und Inkasso","description":"Stellt Rechnungen an Bewohnende, Krankenkassen, Gemeinden und EL-Stellen.","systems":"Fakturierung der Heimsoftware; finanz.NET oder Abacus; eFaktura/Swiss QR"},{"id":"NEUH-08.02.03","name":"Kostengutsprachen und Ergänzungsleistungen","description":"Verfolgt Kostengutsprachen, EL-Verfügungen und die Restfinanzierung.","systems":"EL-Dossier; Gemeinde- und Kantonsformulare; Wiedervorlagen"}]},{"id":"NEUH-08.03","name":"Finanz- und Rechnungswesen","description":"Führt Buchhaltung und Zahlungsverkehr.","systems":"","level3":[{"id":"NEUH-08.03.01","name":"Finanz- und Betriebsbuchhaltung","description":"Führt Buchhaltung, Kostenstellen und Jahresabschluss.","systems":"finanz.NET (Kontenplan Curaviva); Abacus; Treuhand"},{"id":"NEUH-08.03.02","name":"Debitoren, Kreditoren und Zahlungsverkehr","description":"Verarbeitet Zahlungen, Mahnungen und Lieferantenrechnungen.","systems":"Buchhaltungssoftware; E-Banking; Belegworkflow"},{"id":"NEUH-08.03.03","name":"Barbetrag und Taschengeld","description":"Verwaltet Barbetragskonten und Kassen der Bewohnenden.","systems":"Barbetragsverwaltung; Kassabuch"}]},{"id":"NEUH-08.04","name":"Spenden und Fonds","description":"Verwaltet Spenden und zweckgebundene Mittel.","systems":"","level3":[{"id":"NEUH-08.04.01","name":"Spendenverwaltung","description":"Erfasst Spenden auf die Konten Bewohnende und Personal und verdankt sie.","systems":"Spendenliste Excel; E-Banking; Verdankungsbriefe Word"},{"id":"NEUH-08.04.02","name":"Zweckbindung und Steuerbefreiung","description":"Sichert die zweckgebundene Verwendung und die Anerkennung der Steuerbefreiung.","systems":"Fondsrechnung; Dossier Stiftungsaufsicht"}]}]},{"id":"NEUH-09","name":"Personal, Einsatzplanung und Bildung","purpose":"Stellt Personal bereit, plant den Einsatz und fördert die Bildung.","level2":[{"id":"NEUH-09.01","name":"Personaladministration und Entgelt","description":"Führt Personaldossiers und die Lohnverarbeitung.","systems":"","level3":[{"id":"NEUH-09.01.01","name":"Personalstammdaten und Verträge","description":"Führt Dossiers, Verträge und Bewilligungen der Mitarbeitenden.","systems":"personal.NET; Abacus Personal; Personalordner"},{"id":"NEUH-09.01.02","name":"Lohnverarbeitung und Sozialversicherungen","description":"Verarbeitet Löhne, Zulagen, Meldungen und Sozialversicherungen.","systems":"Lohnsoftware mit Swissdec-ELM; personal.NET; Sozialversicherungsformulare"},{"id":"NEUH-09.01.03","name":"Bewilligungen und ausländische Arbeitskräfte","description":"Klärt Arbeitsbewilligungen, Anerkennungen und Aufenthaltsstatus.","systems":"Kantonale Formulare; Dossierpflege"}]},{"id":"NEUH-09.02","name":"Einsatz und Zeit","description":"Plant den Personaleinsatz und erfasst die Zeit.","systems":"","level3":[{"id":"NEUH-09.02.01","name":"Stellenplan und Personalbedarf","description":"Rechnet Soll- und Ist-Bestand sowie Pflegeminuten je Abteilung.","systems":"Einsatzplanungssoftware; Excel-Bedarf; Pflegeminuten aus der Dokumentation"},{"id":"NEUH-09.02.02","name":"Dienst- und Einsatzplanung","description":"Erstellt Dienstpläne für Pflege, Aktivierung, Küche, Hotellerie und Technik.","systems":"POLYPOINT PEP; peps.NET; Modul der Pflegesoftware; Excel-Pläne"},{"id":"NEUH-09.02.03","name":"Ferien, Absenzen und Ersatz","description":"Verwaltet Ferien, Krankheit, Mutterschaft und die Ersatzplanung.","systems":"Einsatzplanungssoftware; Absenzenliste; Krankheitsstatistik"},{"id":"NEUH-09.02.04","name":"Zeiterfassung und Zulagen","description":"Erfasst Arbeitszeit, Nacht- und Wochenendzulagen sowie Inkonvenienzen.","systems":"Zeiterfassungsterminals; mobile Erfassung; Lohnsoftware"}]},{"id":"NEUH-09.03","name":"Rekrutierung und Austritt","description":"Gewinnt Mitarbeitende und begleitet Austritte.","systems":"","level3":[{"id":"NEUH-09.03.01","name":"Ausschreibung und Bewerbungen","description":"Schreibt Stellen aus und bearbeitet Bewerbungen.","systems":"Inserate PDF auf der Website; Bewerbungs-Postfach; Bewerberverwaltung"},{"id":"NEUH-09.03.02","name":"Anstellung und Einarbeitung","description":"Erstellt Arbeitsverträge und führt die Einarbeitung.","systems":"Vertragsvorlagen Word; Einführungskonzept; Checkliste"},{"id":"NEUH-09.03.03","name":"Austritt und Referenzen","description":"Wickelt Kündigungen, Austrittsgespräche und Referenzen ab.","systems":"Austrittscheckliste; Zeugnisvorlagen"}]},{"id":"NEUH-09.04","name":"Bildung, Lehrbetrieb und Entwicklung","description":"Führt den Lehrbetrieb und plant die Entwicklung.","systems":"","level3":[{"id":"NEUH-09.04.01","name":"Ausbildungen und Lernende","description":"Führt Grund- und Tertiärausbildungen (FaGe, Küche, Hotellerie, Betriebsunterhalt, HF).","systems":"Ausbildungskonzept; Lernendendossiers; Bildungscontrolling"},{"id":"NEUH-09.04.02","name":"Praktika, Schnupperlehren und Studienplätze","description":"Organisiert Praktika, Schnupperlehren und Studienplätze.","systems":"Terminplanung; Anmeldungen; Kooperation mit Schulen"},{"id":"NEUH-09.04.03","name":"Qualifikation und Weiterbildung","description":"Erhebt Qualifikationen und plant Weiterbildungen.","systems":"Qualifikationsmatrix; Kursplanung; Weiterbildungsbudget"}]}]},{"id":"NEUH-10","name":"Qualitätsmanagement, Hygiene und Compliance","purpose":"Sichert Qualität, Hygiene und die Einhaltung von Vorgaben.","level2":[{"id":"NEUH-10.01","name":"Qualitätsmanagement","description":"Führt das QM-System und die Qualitätsmessung.","systems":"","level3":[{"id":"NEUH-10.01.01","name":"QM-System und Qualitätsziele","description":"Führt das Qualitätsmanagementsystem und jährliche Qualitätsziele.","systems":"QM-Handbuch; Prozessbeschreibungen Word; Verbandsvorlagen Curaviva"},{"id":"NEUH-10.01.02","name":"Qualitätsmessungen und Kennzahlen","description":"Erhebt Kennzahlen zu Stürzen, Dekubitus, Inkontinenz und Zufriedenheit.","systems":"Qualitätserfassung; Pflegedokumentation; Excel-Auswertungen"},{"id":"NEUH-10.01.03","name":"Audits, Begehungen und Beanstandungen","description":"Plant interne Audits und Begehungen und bearbeitet Feststellungen.","systems":"Auditberichte; Massnahmenlisten; Dossier Heimaufsicht"}]},{"id":"NEUH-10.02","name":"Hygiene und Prävention","description":"Verhindert Infektionen und schützt die Gesundheit.","systems":"","level3":[{"id":"NEUH-10.02.01","name":"Hygieneplan und Infektprävention","description":"Führt Hygieneplan, Händedesinfektion und Präventionsmassnahmen.","systems":"Hygieneplan; Desinfektionsmittel-Nachweise; Schulungen"},{"id":"NEUH-10.02.02","name":"Ausbrüche und Meldepflichten","description":"Erkennt Ausbrüche, koordiniert Massnahmen und erfüllt Meldepflichten.","systems":"Ausbruchsdossier; Meldung an den Kantonsarzt; Telefonlisten"},{"id":"NEUH-10.02.03","name":"Arbeitssicherheit und Gesundheitsförderung","description":"Setzt Arbeitssicherheit, Impfungen und betriebliche Gesundheitsförderung um.","systems":"EKAS-Dokumente; Sicherheitsdatenblätter; Absenzenstatistik"}]},{"id":"NEUH-10.03","name":"Recht, Datenschutz und Aufsicht","description":"Erfüllt rechtliche Pflichten und Datenschutz.","systems":"","level3":[{"id":"NEUH-10.03.01","name":"Datenschutz und Schweigepflicht","description":"Sichert den Umgang mit Gesundheitsdaten und die Schweigepflicht.","systems":"Datenschutzkonzept; Verzeichnis der Bearbeitungen; Verträge mit Dienstleistern"},{"id":"NEUH-10.03.02","name":"Patientenverfügung, Urteilsfähigkeit und Erwachsenenschutz","description":"Setzt Urteilsfähigkeit, Vertretung und Schutzmassnahmen um.","systems":"KESB-Korrespondenz; Verfügungsdokumente; Fallakten"},{"id":"NEUH-10.03.03","name":"Bewilligungen und Aufsicht","description":"Führt Betriebsbewilligung, Heimaufsicht und Meldungen.","systems":"Bewilligungsdossier; Kantonskorrespondenz; Auflagenliste"}]}]},{"id":"NEUH-11","name":"Angehörige, Partner und Öffentlichkeit","purpose":"Pflegt den Kontakt zu Angehörigen, Partnern und der Öffentlichkeit.","level2":[{"id":"NEUH-11.01","name":"Angehörige und Besuchende","description":"Informiert und empfängt Angehörige und Gäste.","systems":"","level3":[{"id":"NEUH-11.01.01","name":"Angehörigengespräche und Information","description":"Führt Standortgespräche und informiert Angehörige.","systems":"Protokolle; Pflegedokumentation; Telefon/E-Mail"},{"id":"NEUH-11.01.02","name":"Empfang, Sekretariat und Telefonie","description":"Empfängt Besuchende und nimmt Anfragen und Essensanmeldungen entgegen.","systems":"Telefonanlage Sekretariat; Besucherliste; Postfach info@"}]},{"id":"NEUH-11.02","name":"Kommunikation und Publikationen","description":"Informiert nach innen und aussen.","systems":"","level3":[{"id":"NEUH-11.02.01","name":"Website und Publikationen","description":"Betreibt die Website und publiziert Menüplan, Aktivitäten und Downloads.","systems":"CMS (sitesystem); PDF-Uploads; Druckerei"},{"id":"NEUH-11.02.02","name":"Medien, Anlässe und Aussenvertretung","description":"Betreut Medienanfragen und Veranstaltungen nach aussen.","systems":"Medienliste; Anlassplanung; Fotoarchiv"},{"id":"NEUH-11.02.03","name":"Rekrutierungs- und Spendenkommunikation","description":"Kommuniziert offene Stellen und Spendenanliegen.","systems":"Inserate PDF; Spendenflyer; Website"}]},{"id":"NEUH-11.03","name":"Zusammenarbeit mit Partnern","description":"Koordiniert die Partner der Region.","systems":"","level3":[{"id":"NEUH-11.03.01","name":"Gemeinden, Kanton und Verbände","description":"Pflegt die Zusammenarbeit mit Gemeinden, Kanton und Verbänden.","systems":"Korrespondenz; Statistikformulare (SOMED); Verbandsvorlagen"},{"id":"NEUH-11.03.02","name":"Kirchgemeinden und Seelsorge","description":"Koordiniert Gottesdienste, Andachten und Seelsorge.","systems":"Terminplanung; Aushänge; Kapelle und Andachtsraum"},{"id":"NEUH-11.03.03","name":"Ärzte, Spitex und Dienstleister","description":"Koordiniert Hausärzte, Spitex, Therapeuten und weitere Dienstleister.","systems":"Telefon/E-Mail; Dienstleistungsverträge; Lieferantenrechnungen"}]}]},{"id":"NEUH-12","name":"Führung, Steuerung und Reporting","purpose":"Steuert die Stiftung mit Strategie, Budget und Kennzahlen.","level2":[{"id":"NEUH-12.01","name":"Strategie und Organisation","description":"Setzt Leitbild, Strategie und Aufbauorganisation.","systems":"","level3":[{"id":"NEUH-12.01.01","name":"Leitbild und Strategie","description":"Formuliert Leitbild, Werte und strategische Ziele.","systems":"Leitbild PDF; Strategiepapier Word; Strategietag"},{"id":"NEUH-12.01.02","name":"Stiftungsrat und Ressorts","description":"Führt Stiftungsratssitzungen und die Ressorts Finanzen und Infrastruktur.","systems":"Traktanden und Protokolle Word; Beschlussregister"},{"id":"NEUH-12.01.03","name":"Organisation und Stellen","description":"Pflegt Organigramm, Stellen und Führungsstruktur.","systems":"Organigramm; Stellenbeschreibungen Word"}]},{"id":"NEUH-12.02","name":"Kennzahlen, Budget und Berichte","description":"Plant, misst und berichtet.","systems":"","level3":[{"id":"NEUH-12.02.01","name":"Budgetierung und Controlling","description":"Erstellt Budget, plant Investitionen und führt das Controlling.","systems":"Excel-Budgetmodell; Buchhaltung; Kostenstellenrechnung"},{"id":"NEUH-12.02.02","name":"Kennzahlen und Statistiken","description":"Erhebt Belegung, Pflegeminuten, Personalkosten und die Branchenstatistik.","systems":"SOMED-Statistik; Verbands- und Bundesstatistik; Excel-Dashboard"},{"id":"NEUH-12.02.03","name":"Berichte an Behörden und Stiftungsaufsicht","description":"Erstellt Jahresbericht, Aufsichtsberichte und Meldungen.","systems":"Jahresbericht Word/PDF; Aufsichtsformulare; Buchhaltungsabschluss"}]}]},{"id":"NEUH-13","name":"IT, Arbeitsplätze und Informationssicherheit","purpose":"Betreibt Arbeitsplätze, Netze und Anwendungen und schützt die Daten.","level2":[{"id":"NEUH-13.01","name":"Arbeitsplätze und Netze","description":"Stellt Geräte und Infrastruktur bereit.","systems":"","level3":[{"id":"NEUH-13.01.01","name":"Arbeitsplätze und Geräte","description":"Stellt PCs, Drucker, Tablets und Mobile bereit und unterhält sie.","systems":"Windows-Arbeitsplätze; Tablets für die Pflegedokumentation; Multifunktionsdrucker"},{"id":"NEUH-13.01.02","name":"Netzwerk, WLAN und Internet","description":"Betreibt Netzwerk, WLAN und Internetanschluss.","systems":"Router und Switches; WLAN-Access-Points; Internetprovider"},{"id":"NEUH-13.01.03","name":"Benutzerkonten und Support","description":"Verwaltet Konten und Berechtigungen und organisiert den Support.","systems":"Externe IT-Betreuung; Fernwartungswerkzeug; Kontenliste"}]},{"id":"NEUH-13.02","name":"Kommunikation und Ablage","description":"Betreibt Kommunikationsmittel und Dokumentenablage.","systems":"","level3":[{"id":"NEUH-13.02.01","name":"E-Mail, Kalender und Zusammenarbeit","description":"Betreibt E-Mail, Kalender und die gemeinsame Zusammenarbeit.","systems":"Microsoft 365/Exchange; Verteilerlisten; Teams/SharePoint"},{"id":"NEUH-13.02.02","name":"Telefonie, Fax und Personenruf","description":"Betreibt Telefonanlage, Faxeingang und das Personenrufsystem.","systems":"Telefonanlage mit DECT; Fax-Server; Nummernliste"},{"id":"NEUH-13.02.03","name":"Dateiablage und Vorlagen","description":"Strukturiert Laufwerke, Ordner und Dokumentvorlagen.","systems":"Serverlaufwerke oder NAS; Cloud-Ablage; Vorlagenbibliothek"}]},{"id":"NEUH-13.03","name":"Informationssicherheit und Beschaffung","description":"Sichert Daten und beschafft Software.","systems":"","level3":[{"id":"NEUH-13.03.01","name":"Backups und Datensicherung","description":"Sichert Daten und prüft die Wiederherstellung.","systems":"Backup-Lösung; Restore-Tests; Offsite-Kopie"},{"id":"NEUH-13.03.02","name":"Berechtigungen und Informationssicherheit","description":"Regelt Zugriffe, Sicherheitsvorgaben und den Umgang mit Vorfällen.","systems":"Berechtigungskonzept; Antivirus und Updates; Sicherheitsrichtlinie"},{"id":"NEUH-13.03.03","name":"Softwarebeschaffung, Lizenzen und Verträge","description":"Beschafft Software und führt Lizenzen sowie Wartungs- und Supportverträge.","systems":"Vertragsregister; Lizenzliste; Beschaffungsanträge"}]}]}]};
+
+const SCALES = {
+  kritikalitaet: [
+    { value: 1, label: 'Verzichtbar', anchor: 'Ausfall ohne wahrnehmbare Folgen; der Arbeitsalltag läuft unbegrenzt ohne das System weiter.' },
+    { value: 2, label: 'Unterstützend', anchor: 'Ausfall bis zu einer Woche tolerierbar; Nacharbeit nötig, aber kein Prozess steht.' },
+    { value: 3, label: 'Wichtig', anchor: 'Ausfall ab einem Arbeitstag blockiert einen Kernprozess (Pflege, Verpflegung, Abrechnung); ein dokumentierter Workaround existiert.' },
+    { value: 4, label: 'Vital', anchor: 'Ausfall gefährdet unmittelbar die Versorgung oder Sicherheit der Bewohnerinnen und Bewohner, gesetzliche Pflichten (Pflegedokumentation, Meldepflichten, Medikation) oder die Abrechnung. Toleranz Minuten bis wenige Stunden.' }
+  ],
+  schmerzpunkt: [
+    { value: 1, label: 'Kein spürbarer Schmerz', anchor: 'Fachbereich ist zufrieden, keine Änderungswünsche.' },
+    { value: 2, label: 'Gelegentliche Reibung', anchor: 'Vereinzelte Umwege, störend, aber hinnehmbar.' },
+    { value: 3, label: 'Regelmässige Mehraufwände', anchor: 'Doppelerfassung oder manuelle Übertragungen gehören zum Alltag.' },
+    { value: 4, label: 'Tägliche Blockaden', anchor: 'Institutionalisierte Workarounds (Privatlisten, Papier neben dem System, Export-Flickarbeit), wiederkehrende Beschwerden.' },
+    { value: 5, label: 'Akuter Handlungsdruck', anchor: 'Der Fachbereich fordert eine Ablösung explizit; Risiko von Schatten-IT und Excel-Inseln.' }
+  ],
+  automatisierung: [
+    { value: 0, label: 'Rein manuell', anchor: 'Daten werden von Hand abgetippt, telefonisch oder auf Papier übermittelt.' },
+    { value: 1, label: 'Datei-basiert, manuell', anchor: 'Export und Import werden von einer Person angestossen.' },
+    { value: 2, label: 'Geplant und automatisch', anchor: 'Batch- oder Dateiübertragung läuft zeitgesteuert ohne Eingriff.' },
+    { value: 3, label: 'Ereignisgetrieben', anchor: 'Änderungen fliessen über Schnittstelle oder API in (nahezu) Echtzeit.' }
+  ],
+  datenqualitaet: [
+    { value: 1, label: 'Mangelhaft', anchor: 'Erhebliche Dubletten, Lücken oder veraltete Bestände; der Fachbereich misstraut den Daten.' },
+    { value: 2, label: 'Ausreichend', anchor: 'Für den aktuellen Zweck brauchbar, bekannte und dokumentierte Defizite.' },
+    { value: 3, label: 'Gut', anchor: 'Weitgehend vollständig und aktuell; Defizite sind die Ausnahme und werden korrigiert.' },
+    { value: 4, label: 'Sehr gut', anchor: 'Validierte, gepflegte Daten mit aktivem Data Owner und regelmässiger Qualitätskontrolle.' }
+  ],
+  datenklasse: [
+    { value: 1, label: 'Klasse 1', anchor: 'Öffentlich oder interne Information ohne besonderen Schutzbedarf (z. B. Menüplan, Anlässe).' },
+    { value: 2, label: 'Klasse 2', anchor: 'Intern vertraulich innerhalb der Organisation (z. B. interne Weisungen, Sitzungsprotokolle).' },
+    { value: 3, label: 'Klasse 3', anchor: 'Vertraulich: persönliche Daten von Bewohnenden, Angehörigen oder Mitarbeitenden, AHV-Nummer, Vertragsdaten.' },
+    { value: 4, label: 'Klasse 4', anchor: 'Streng vertraulich: besonders schützenswerte Personendaten, Gesundheitsdaten, Pflege- und Medikationsdaten, Verfügungen.' }
+  ]
+};
+
+const SCHEMA = [
+  {
+    id: 'identification',
+    title: '1. Identifikation',
+    intro: 'Grunddaten der Anwendung und der Erhebung.',
+    fields: [
+      { id: 'anwendungsname', label: 'Anwendungsname', type: 'text', required: true, hint: 'Wie heisst die Anwendung im Betrieb? Produktname in Klammern, z. B. «Pflegedokumentation (careCoach)».' },
+      { id: 'anwendungsart', label: 'Art der Anwendung', type: 'select', required: true, options: ['Standardprodukt der Branche (Pflege- oder Heimsoftware)', 'Standardprodukt Büro, ERP oder Finanzen', 'Eigenentwicklung oder Excel-Lösung', 'Cloud- oder Abo-Dienst', 'Schnittstelle oder Integration', 'Dienstleistung ohne System im Haus'] },
+      { id: 'interneId', label: 'Interne ID / Verzeichnisreferenz', type: 'text', required: true, hint: 'ID im Applikations- oder Vertragsverzeichnis der Stiftung, z. B. NA-0147. «keine» ist ein gültiger Befund.' },
+      { id: 'hersteller', label: 'Hersteller / Anbieter', type: 'text', required: true, hint: 'Wer liefert, wartet und unterstützt das Produkt? Bei Eigenbau «intern».' },
+      { id: 'produktversion', label: 'Produktversion', type: 'text', required: true, hint: 'Welche Version ist produktiv im Einsatz? «unbekannt» ist ein Befund.' },
+      { id: 'erhebungsdatum', label: 'Erhebungsdatum', type: 'date', required: true },
+      { id: 'erheber', label: 'Erheber', type: 'text', required: true, hint: 'Name und Rolle, z. B. «Geschäftsleitung, Administration».' }
+    ]
+  },
+  {
+    id: 'fachlichkeit',
+    title: '2. Fachlichkeit',
+    intro: 'Abgedeckte Fähigkeiten, Nutzung und Verantwortlichkeiten.',
+    fields: [
+      { id: 'capabilities', label: 'Abgedeckte Business Capabilities', type: 'capability', required: true, hint: 'Kennungen aus dem Katalog «Wohn- und Pflegezentrum» (NEUH-xx.xx.xx). Mehrfachnennung möglich; es wird auf der tiefsten zutreffenden Stufe erfasst.' },
+      { id: 'fachbereiche', label: 'Nutzende Fachbereiche', type: 'list', required: true, hint: 'Organisationseinheiten, die produktiv mit der Anwendung arbeiten.', suggestions: ['Pflege und Betreuung', 'Aktivierung', 'Küche und Gastronomie', 'Hotellerie und Hauswirtschaft', 'Technischer Dienst', 'Administration', 'Geschäftsleitung und Führung', 'Freiwillige'] },
+      { id: 'nutzerAnzahl', label: 'Anzahl aktive Nutzer', type: 'text', required: true, hint: 'Zahl mit Stichtag, z. B. «42 (Stand 2026-09; davon 6 mit Schreibrechten)».' },
+      { id: 'kritischeProzesse', label: 'Kritische Geschäftsprozesse', type: 'objectlist', required: true, hint: 'Prozesse, die bei Ausfall stillstehen.', columns: [
+        { id: 'prozess', label: 'Prozessname', type: 'text' },
+        { id: 'fachbereich', label: 'Fachbereich', type: 'select', options: ['Pflege und Betreuung', 'Aktivierung', 'Küche und Gastronomie', 'Hotellerie und Hauswirtschaft', 'Technischer Dienst', 'Administration', 'Führung', 'Externer Partner'] }
+      ]},
+      { id: 'bewohnerbezug', label: 'Bewohnerbezug', type: 'select', required: true, options: ['ja, direkte Bewohnerdaten', 'ja, indirekt (Rechnungen, Auswertungen)', 'nein'], hint: 'Berührt die Anwendung Daten von Bewohnerinnen und Bewohnern?' },
+      { id: 'businessOwner', label: 'Business Owner', type: 'text', required: true, hint: 'Fachlich verantwortlich für Prioritäten und Budget, z. B. Leitung Pflege und Betreuung, Leitung Hotellerie.' },
+      { id: 'dataOwner', label: 'Data Owner', type: 'text', required: true, hint: 'Verantwortet Datenqualität und Zugriffsfreigaben.' }
+    ]
+  },
+  {
+    id: 'daten',
+    title: '3. Daten',
+    intro: 'Datenbestände, Formate, Klassifikation, Qualität und Aufbewahrung.',
+    fields: [
+      { id: 'datenobjekte', label: 'Persistierte Datenobjekte', type: 'list', required: true, hint: 'Welche fachlichen Objekte speichert die Anwendung dauerhaft?', suggestions: ['Bewohnerstammdaten', 'Pflegedokumentation', 'Medikationsplan', 'Vitalwerte', 'Angehörigenkontakte', 'Abrechnungsdaten', 'Personaldaten', 'Liegenschaftsdaten', 'Finanzdaten', 'Spendendaten'] },
+      { id: 'datenformate', label: 'Datenformate', type: 'multiselect', required: true, options: ['strukturiert (Tabellen)', 'Freitext', 'Dokumente/PDF', 'Bilder/Scans', 'Vitalwerte/Messreihen', 'Kalender- und Plandaten'] },
+      { id: 'datenhaltung', label: 'Datenhaltungstechnologie', type: 'text', required: true, hint: 'Datenbankprodukt mit Version, Cloud-Dienst oder «Dateiablage».' },
+      { id: 'datenvolumen', label: 'Datenvolumen', type: 'text', required: false, hint: 'Grössenordnung in GB mit Stichtag.' },
+      { id: 'datenklassifikation', label: 'Datenklassifikation', type: 'scale', scale: 'datenklasse', required: true, hint: 'Sensitivitätsklasse des sensibelsten Bestands.' },
+      { id: 'personenbezug', label: 'Personenbezug', type: 'multiselect', required: true, options: ['Bewohnerdaten', 'Gesundheitsdaten', 'Angehörigendaten', 'Mitarbeitendendaten', 'AHV-Nummer', 'keiner'] },
+      { id: 'datenqualitaet', label: 'Datenqualitäts-Einschätzung', type: 'scale', scale: 'datenqualitaet', required: true, hint: 'Wie beurteilen Fachbereich und Administration die Datenqualität? Skala 1–4.' },
+      { id: 'aufbewahrung', label: 'Aufbewahrung und Archivierung', type: 'text', required: true, hint: 'Aufbewahrungsfrist, Archivort und Löschkonzept, z. B. «10 Jahre, Aktenarchiv, Löschung nach Frist» oder «keine Regelung».' },
+      { id: 'datenexport', label: 'Exportierbarkeit der Daten', type: 'select', required: true, options: ['vollständig exportierbar', 'teilweise exportierbar', 'nur PDF oder Ausdrucke', 'unklar'], hint: 'Können die Daten bei einer Ablösung vollständig übernommen werden?' }
+    ]
+  },
+  {
+    id: 'integration',
+    title: '4. Integration',
+    intro: 'Schnittstellen, externe Partner und Automatisierungsgrad.',
+    fields: [
+      { id: 'eingehendeSchnittstellen', label: 'Eingehende Schnittstellen', type: 'objectlist', required: true, hint: 'Von welchen Systemen erhält die Anwendung Daten?', columns: [
+        { id: 'partnersystem', label: 'Partnersystem', type: 'text' },
+        { id: 'technologie', label: 'Technologie', type: 'select', options: ['API', 'Datei/CSV', 'SFTP', 'DB-Link', 'HL7/FHIR', 'E-Mail', 'Scannung/Fax', 'manuell'] },
+        { id: 'frequenz', label: 'Frequenz', type: 'select', options: ['Echtzeit', 'stündlich', 'täglich', 'wöchentlich', 'monatlich', 'ad hoc'] },
+        { id: 'dokumentation', label: 'Dokumentationsstand', type: 'select', options: ['dokumentiert', 'veraltet', 'mündlich überliefert'] }
+      ]},
+      { id: 'ausgehendeSchnittstellen', label: 'Ausgehende Schnittstellen', type: 'objectlist', required: true, hint: 'An welche Systeme liefert sie Daten?', columns: [
+        { id: 'partnersystem', label: 'Partnersystem', type: 'text' },
+        { id: 'technologie', label: 'Technologie', type: 'select', options: ['API', 'Datei/CSV', 'SFTP', 'DB-Link', 'HL7/FHIR', 'E-Mail', 'PDF/Ausdruck', 'manuell'] },
+        { id: 'frequenz', label: 'Frequenz', type: 'select', options: ['Echtzeit', 'stündlich', 'täglich', 'wöchentlich', 'monatlich', 'ad hoc'] },
+        { id: 'dokumentation', label: 'Dokumentationsstand', type: 'select', options: ['dokumentiert', 'veraltet', 'mündlich überliefert'] }
+      ]},
+      { id: 'externePartner', label: 'Schnittstellen zu externen Partnern', type: 'objectlist', required: true, hint: 'Datenaustausch mit Stellen ausserhalb des Hauses.', columns: [
+        { id: 'partnerTyp', label: 'Partner', type: 'select', options: ['Spital', 'Hausarzt/Hausärztin', 'Apotheke', 'Krankenkasse', 'Gemeinde', 'Kanton', 'EL-Stelle', 'IT-Partner', 'Treuhand', 'Lieferant', 'andere'] },
+        { id: 'gegenstelle', label: 'Gegenstelle', type: 'text' },
+        { id: 'technologie', label: 'Technologie', type: 'select', options: ['API', 'Datei/CSV', 'SFTP', 'Portal', 'E-Mail', 'Papier/Fax', 'manuell'] },
+        { id: 'frequenz', label: 'Frequenz', type: 'select', options: ['Echtzeit', 'täglich', 'wöchentlich', 'monatlich', 'jährlich', 'ad hoc'] }
+      ]},
+      { id: 'automatisierungsgrad', label: 'Automatisierungsgrad', type: 'scale', scale: 'automatisierung', required: true, hint: 'Wie viel manueller Eingriff steckt im Austausch? Skala 0–3.' },
+      { id: 'adapterReadiness', label: 'Adapter- und Integrations-Readiness', type: 'select', required: true, options: ['gut', 'eingeschränkt', 'nein'], hint: 'Lässt sich die Anwendung ohne Eingriff anzapfen (Export, API, Ereignis, Datenbankzugriff)?' }
+    ]
+  },
+  {
+    id: 'technik',
+    title: '5. Technik und Betrieb',
+    intro: 'Plattform, Datenstandort, Supportstatus und technische Schuld.',
+    fields: [
+      { id: 'betriebsmodell', label: 'Betriebsmodell', type: 'select', required: true, options: ['on-premise im Haus', 'gehostet beim IT-Partner', 'Cloud (Schweiz)', 'SaaS beim Hersteller', 'webbasiert beim Hersteller', 'kein eigener Systembetrieb'] },
+      { id: 'plattform', label: 'Plattform', type: 'text', required: true, hint: 'Betriebssystem, Datenbank, Laufzeitumgebung, Geräte – je mit Version.' },
+      { id: 'datenstandort', label: 'Datenstandort', type: 'select', required: true, options: ['Schweiz', 'EWR/EU', 'Drittland', 'unbekannt'], hint: 'Wo liegen die Daten physisch? «unbekannt» ist ein Klärungsauftrag.' },
+      { id: 'supportstatus', label: 'Supportstatus des Herstellers', type: 'text', required: true, hint: 'Datum des Supportendes oder «abgelaufen» / «unbekannt».' },
+      { id: 'verfuegbarkeit', label: 'Verfügbarkeitsanforderung', type: 'text', required: true, hint: 'Prozent und Zeitfenster, z. B. «99 %, täglich 06.00–22.00 Uhr; Notbetrieb auf Papier definiert».' },
+      { id: 'backup', label: 'Backup und Wiederherstellung', type: 'text', required: true, hint: 'Backup-Frequenz, Aufbewahrung, letzter erfolgreicher Restore-Test.' },
+      { id: 'releasezyklen', label: 'Releasezyklen', type: 'text', required: false, hint: 'Wie oft Updates erscheinen und wie schnell sie eingespielt werden.' },
+      { id: 'technischeSchuld', label: 'Technische Schuld', type: 'select', required: true, options: ['tief', 'mittel', 'hoch'], hint: 'Kurzbegründung in den Bemerkungen oder offenen Punkten.' }
+    ]
+  },
+  {
+    id: 'security',
+    title: '6. Security und Compliance',
+    intro: 'Zugriff, Verschlüsselung, Protokollierung und Datenschutz.',
+    fields: [
+      { id: 'iamSso', label: 'IAM- und SSO-Anbindung', type: 'select', required: true, options: ['ja', 'nein', 'teilweise'], hint: 'Anschluss an die zentrale Benutzerverwaltung oder Einzelkonten direkt im System.' },
+      { id: 'mfa', label: 'MFA (zweiter Faktor)', type: 'select', required: true, options: ['ja', 'nein', 'technisch nicht möglich'] },
+      { id: 'rollenmodell', label: 'Rollen- und Berechtigungsmodell', type: 'textarea', required: true, hint: 'Kurzbeschrieb: Rollen, Granularität, Vergabeprozess, Austrittsprozess.' },
+      { id: 'verschluesselung', label: 'Verschlüsselung', type: 'select', required: true, options: ['ja', 'nein', 'teilweise'], hint: 'Transport- und Datenträgerverschlüsselung.' },
+      { id: 'auditLogging', label: 'Audit- und Zugriffsprotokollierung', type: 'select', required: true, options: ['ja', 'rudimentär', 'nein'] },
+      { id: 'zugriffExtern', label: 'Externer Zugriff', type: 'select', required: true, options: ['nein', 'ja, Hersteller oder IT-Partner', 'ja, weitere Dritte', 'unklar'], hint: 'Wer kann von aussen auf das System oder die Daten zugreifen (Fernwartung, Support)?' },
+      { id: 'dsfa', label: 'Datenschutz-Folgenabschätzung', type: 'select', required: true, options: ['ja', 'nein', 'nicht erforderlich'] },
+      { id: 'avv', label: 'Auftragsbearbeitungsvertrag', type: 'select', required: true, options: ['ja', 'nein', 'nicht relevant'] }
+    ]
+  },
+  {
+    id: 'wirtschaftlichkeit',
+    title: '7. Wirtschaftlichkeit',
+    intro: 'Kosten, Vertragslaufzeiten und interner Betreuungsaufwand.',
+    fields: [
+      { id: 'lizenzkosten', label: 'Lizenzkosten p. a.', type: 'text', required: true, hint: 'Jährliche Lizenz- oder Abonnementkosten in CHF mit Vertragsjahr.' },
+      { id: 'betriebskosten', label: 'Betriebs- und Wartungskosten p. a.', type: 'text', required: true, hint: 'Wartung, Hosting, Infrastruktur in CHF, intern und extern getrennt.' },
+      { id: 'betreuungsaufwand', label: 'Interner Betreuungsaufwand', type: 'text', required: true, hint: 'Personentage pro Jahr, Schätzung durch Betrieb und Administration.' },
+      { id: 'vertragslaufzeit', label: 'Vertragslaufzeit und Kündigungsfrist', type: 'text', required: true, hint: 'Laufzeitende, Kündigungsfrist, nächster Kündigungstermin.' },
+      { id: 'investitionsbedarf', label: 'Geschätzter Handlungs- oder Investitionsbedarf', type: 'text', required: false, hint: 'Grössenordnung in CHF für Ablösung, Erweiterung oder Schnittstelle.' }
+    ]
+  },
+  {
+    id: 'bewertung',
+    title: '8. Bewertung und Priorisierung',
+    intro: 'Kritikalität, Schmerzpunkt, TIME-Vorschlag und nächste Schritte.',
+    fields: [
+      { id: 'kritikalitaet', label: 'Kritikalität', type: 'scale', scale: 'kritikalitaet', required: true },
+      { id: 'schmerzpunkt', label: 'Schmerzpunkt', type: 'scale', scale: 'schmerzpunkt', required: true },
+      { id: 'timeVorschlag', label: 'TIME-Vorschlag', type: 'select', required: true, options: ['Tolerate', 'Invest', 'Migrate', 'Eliminate'] },
+      { id: 'adapterKandidat', label: 'Adapter-Kandidat', type: 'select', required: true, options: ['ja', 'nein', 'später'] },
+      { id: 'prioritaet', label: 'Priorität', type: 'select', required: true, options: ['hoch', 'mittel', 'tief'] },
+      { id: 'naechsterSchritt', label: 'Nächster Schritt', type: 'text', required: true, hint: 'Eine konkret überprüfbare Handlung, z. B. «Exportfunktion prüfen lassen (bis 31.10.2026)».' },
+      { id: 'verantwortlich', label: 'Verantwortlich', type: 'text', required: true, hint: 'Wer treibt den nächsten Schritt?' },
+      { id: 'begruendung', label: 'Begründung', type: 'textarea', required: true, hint: 'Drei bis fünf Sätze mit Bezug auf die Abschnitte 2 bis 7.' }
+    ]
+  },
+  {
+    id: 'risiko',
+    title: '9. Risiko, Support und Nachfolge',
+    intro: 'Wissensträger, Supportwege, Ausfallverhalten und offene Punkte.',
+    fields: [
+      { id: 'schluesselperson', label: 'Schlüsselperson im Haus', type: 'text', required: true, hint: 'Wer kennt das System wirklich? Name und Rolle.' },
+      { id: 'vertretung', label: 'Vertretungsregelung', type: 'select', required: true, options: ['ja, dokumentiert', 'ja, mündlich', 'nein'] },
+      { id: 'supportweg', label: 'Supportweg', type: 'text', required: true, hint: 'Wen ruft man an? Erstreaktionszeit, Ticketweg, Kosten pro Stunde.' },
+      { id: 'dokumentation', label: 'Betriebsdokumentation', type: 'select', required: true, options: ['aktuell', 'veraltet', 'fehlt'] },
+      { id: 'schulungsstand', label: 'Schulungsstand der Nutzenden', type: 'select', required: true, options: ['alle geschult', 'teilweise geschult', 'keine Schulung'] },
+      { id: 'abhaengigkeitPartner', label: 'Abhängigkeit von Hersteller oder IT-Partner', type: 'select', required: true, options: ['gering', 'mittel', 'hoch'] },
+      { id: 'workaroundBeiAusfall', label: 'Ablauf bei Ausfall (Workaround)', type: 'textarea', required: true, hint: 'Wie arbeitet der Betrieb ohne das System weiter? Papierformulare, Rückfallliste, Notfallkontakte.' },
+      { id: 'offenePunkte', label: 'Offene Punkte und Feststellungen', type: 'textarea', required: false, hint: 'Was bleibt zu klären? Widersprüche, fehlende Nachweise, Beobachtungen aus der Erhebung.' }
+    ]
+  }
+];
+
+const STORAGE_KEY = 'ist-aufnahme-neuhaus-v1';
+const FORM_VERSION = '2.0';
+
+let state = { apps: [], currentAppId: null, currentSection: 0, view: 'uebersicht' };
+let ui = { capSearch: '', capOnlySelected: false, collapsed: {}, matrixSearch: '', matrixFilter: 'alle', sortKey: 'name', sortDir: 1 };
+
+function init() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.apps) { state = Object.assign(state, parsed); }
+    } catch (e) { console.error('Gespeicherter Stand konnte nicht gelesen werden', e); }
+  }
+  if (!state.apps || !state.apps.length) { createApp(); }
+  if (!state.currentAppId) { state.currentAppId = state.apps[0].id; }
+  if (!state.view) { state.view = 'uebersicht'; }
+  render();
+  setupAutosave();
+}
+
+function emptyData() {
+  const data = {};
+  SCHEMA.forEach(function (section) {
+    section.fields.forEach(function (field) {
+      if (field.type === 'list' || field.type === 'multiselect' || field.type === 'objectlist' || field.type === 'capability') {
+        data[field.id] = [];
+      } else if (field.type === 'date') {
+        data[field.id] = new Date().toISOString().slice(0, 10);
+      } else {
+        data[field.id] = '';
+      }
+    });
+  });
+  return data;
+}
+
+function createApp(template) {
+  const id = 'app-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+  const app = {
+    id: id,
+    meta: { catalogVersion: CATALOG.version, formVersion: FORM_VERSION, created: new Date().toISOString(), localChange: new Date().toISOString() },
+    data: template ? JSON.parse(JSON.stringify(template.data)) : emptyData()
+  };
+  state.apps.push(app);
+  state.currentAppId = id;
+  state.currentSection = 0;
+  return app;
+}
+
+function getCurrentApp() {
+  return state.apps.find(function (a) { return a.id === state.currentAppId; }) || state.apps[0];
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const app = getCurrentApp();
+  if (app) { app.meta.lastSaved = new Date().toISOString(); app.meta.localChange = app.meta.lastSaved; }
+  const bar = document.getElementById('statusBar');
+  if (bar) { bar.textContent = 'Automatisch gespeichert um ' + new Date().toLocaleTimeString('de-CH'); }
+  if (window.SyncUI && window.SyncUI.scheduleAutoSync) { window.SyncUI.scheduleAutoSync(); }
+}
+
+function setupAutosave() {
+  const area = document.getElementById('formArea');
+  area.addEventListener('change', save, true);
+  area.addEventListener('input', function () {
+    clearTimeout(window._saveTimeout);
+    window._saveTimeout = setTimeout(save, 900);
+  }, true);
+}
+
+function validateSection(section, app) {
+  const errors = [];
+  app = app || getCurrentApp();
+  section.fields.forEach(function (field) {
+    if (!field.required) { return; }
+    const val = app.data[field.id];
+    if (Array.isArray(val)) { if (val.length === 0) { errors.push(field.label); } }
+    else if (typeof val === 'string' && val.trim() === '') { errors.push(field.label); }
+  });
+  return errors;
+}
+
+function validateApp(app) {
+  const errors = [];
+  SCHEMA.forEach(function (section) {
+    validateSection(section, app).forEach(function (label) { errors.push(section.title + ' → ' + label); });
+  });
+  return errors;
+}
+
+function completeness(app) {
+  let total = 0, filled = 0;
+  SCHEMA.forEach(function (section) {
+    section.fields.forEach(function (field) {
+      if (!field.required) { return; }
+      total++;
+      const val = app.data[field.id];
+      if (Array.isArray(val)) { if (val.length > 0) { filled++; } }
+      else if (typeof val === 'string' && val.trim() !== '') { filled++; }
+    });
+  });
+  return { total: total, filled: filled, pct: total ? Math.round(filled / total * 100) : 0 };
+}
+
+function render() {
+  renderAppList();
+  renderSectionNav();
+  renderTabs();
+  if (state.view === 'uebersicht') { renderUebersicht(); }
+  else if (state.view === 'erfassung') { renderSection(); }
+  if (state.view === 'sync' && window.SyncUI) { window.SyncUI.render(); }
+  updateStatus();
+}
+
+function renderTabs() {
+  document.getElementById('tabUebersicht').className = 'tab' + (state.view === 'uebersicht' ? ' active' : '');
+  document.getElementById('tabErfassung').className = 'tab' + (state.view === 'erfassung' ? ' active' : '');
+  document.getElementById('viewUebersicht').className = state.view === 'uebersicht' ? '' : 'hidden';
+  document.getElementById('viewErfassung').className = state.view === 'erfassung' ? '' : 'hidden';
+  document.getElementById('tabSync').className = 'tab' + (state.view === 'sync' ? ' active' : '');
+  document.getElementById('viewSync').className = state.view === 'sync' ? '' : 'hidden';
+  document.getElementById('sectionsHeading').style.visibility = state.view === 'erfassung' ? 'visible' : 'hidden';
+}
+
+function renderAppList() {
+  const container = document.getElementById('appList');
+  container.innerHTML = '';
+  state.apps.forEach(function (app) {
+    const chip = document.createElement('div');
+    chip.className = 'app-chip' + (app.id === state.currentAppId ? ' active' : '');
+    const name = app.data.anwendungsname || 'Neue Anwendung';
+    const c = completeness(app);
+    chip.innerHTML = '<span class="name">' + escapeHtml(name) + '</span><span class="pct">' + c.pct + '%</span><span class="remove" title="Anwendung löschen">×</span>';
+    chip.onclick = function (e) {
+      if (e.target.classList.contains('remove')) { appActions.deleteApp(e, app.id); return; }
+      appActions.selectApp(app.id);
+    };
+    container.appendChild(chip);
+  });
+}
+
+function renderSectionNav() {
+  const nav = document.getElementById('sectionNav');
+  nav.innerHTML = '';
+  const app = getCurrentApp();
+  SCHEMA.forEach(function (section, idx) {
+    const errors = validateSection(section, app);
+    const anyData = section.fields.some(function (f) {
+      const v = app.data[f.id];
+      return Array.isArray(v) ? v.length > 0 : String(v || '').trim() !== '';
+    });
+    let status = 'empty';
+    if (errors.length === 0 && anyData) { status = 'valid'; }
+    else if (errors.length > 0 && anyData) { status = 'partial'; }
+    else if (errors.length > 0) { status = 'invalid'; }
+    const item = document.createElement('div');
+    item.className = 'nav-item ' + status + (idx === state.currentSection && state.view === 'erfassung' ? ' active' : '');
+    item.innerHTML = '<span class="dot"></span><span>' + section.title + '</span>';
+    item.onclick = function () { state.view = 'erfassung'; state.currentSection = idx; render(); };
+    nav.appendChild(item);
+  });
+}
+
+function renderSection() {
+  const app = getCurrentApp();
+  if (!app) { return; }
+  const section = SCHEMA[state.currentSection];
+  const errors = validateSection(section, app);
+  const formArea = document.getElementById('formArea');
+  formArea.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  let head = '<h2>' + section.title + '</h2><p class="intro">' + section.intro + '</p>';
+  if (section.id === 'fachlichkeit') {
+    head += '<div class="help-panel"><h4>Capability-Katalog «Wohn- und Pflegezentrum»</h4>' +
+      '<p>' + escapeHtml(CATALOG.note) + '</p>' +
+      '<p class="small">Katalogversion ' + CATALOG.version + ', gültig ab ' + CATALOG.validFrom + '. Bei Mehrfachnutzen alle zutreffenden Kennungen erfassen; die Auswertung zählt jede Kennung genau einmal.</p></div>';
+  }
+  card.innerHTML = head;
+
+  const capField = section.fields.find(function (f) { return f.type === 'capability'; });
+  if (capField) {
+    card.appendChild(buildCapabilityBlock(capField, errors));
+  }
+
+  section.fields.forEach(function (field) {
+    if (field.type === 'capability') { return; }
+    const fieldEl = document.createElement('div');
+    fieldEl.className = 'field' + (field.required ? ' required' : '') + (errors.indexOf(field.label) >= 0 ? ' invalid' : '');
+    fieldEl.innerHTML = renderField(field, app.data[field.id]);
+    card.appendChild(fieldEl);
+  });
+
+  formArea.appendChild(card);
+  if (errors.length) {
+    const err = document.createElement('div');
+    err.className = 'error-msg';
+    err.textContent = 'Noch ausstehende Pflichtfelder: ' + errors.join(', ');
+    formArea.appendChild(err);
+  }
+  if (ui.capSearch) {
+    const input = document.getElementById('capSearch');
+    if (input) { input.value = ui.capSearch; applyCapFilter(); }
+  }
+  updateStatus();
+}
+
+function buildCapabilityBlock(field, errors) {
+  const wrap = document.createElement('div');
+  wrap.className = 'field required' + (errors.indexOf(field.label) >= 0 ? ' invalid' : '');
+  wrap.innerHTML = '<label>' + field.label + '</label><span class="hint">' + (field.hint || '') + '</span>' +
+    '<div class="cap-tools">' +
+      '<input type="search" id="capSearch" placeholder="Capability suchen (Kennung oder Begriff)" oninput="appActions.filterCaps(this.value)">' +
+      '<label style="font-size:0.85rem;display:flex;gap:0.35rem;align-items:center;font-weight:normal;"><input type="checkbox" id="capOnlySelected" onchange="appActions.toggleOnlySelected(this.checked)"> nur gewählte anzeigen</label>' +
+      '<span class="count" id="capCount"></span>' +
+    '</div>' +
+    '<div class="capability-picker" id="capPicker"></div>' +
+    '<div class="selected-caps" id="capSelected"></div>';
+  const picker = wrap.querySelector('#capPicker');
+  CATALOG.level1.forEach(function (l1) {
+    const dom = document.createElement('div');
+    dom.className = 'cap-domain' + (ui.collapsed[l1.id] ? ' collapsed' : '');
+    dom.dataset.domain = l1.id;
+    let h = '<h4 data-domain="' + l1.id + '" title="Ein- oder ausklappen">' + l1.id + ' · ' + escapeHtml(l1.name) + '</h4>';
+    l1.level2.forEach(function (l2) {
+      if (!l2.level3.length) {
+        h += capItemHtml(field.id, l2.id, l2.name, l1.id);
+      } else {
+        h += '<div class="cap-group"><h5>' + l2.id + ' · ' + escapeHtml(l2.name) + '</h5>';
+        l2.level3.forEach(function (l3) { h += capItemHtml(field.id, l3.id, l3.name, l1.id); });
+        h += '</div>';
+      }
+    });
+    dom.innerHTML = h;
+    picker.appendChild(dom);
+  });
+  picker.addEventListener('click', function (e) {
+    const h4 = e.target.closest('h4[data-domain]');
+    if (!h4) { return; }
+    const d = h4.dataset.domain;
+    ui.collapsed[d] = !ui.collapsed[d];
+    h4.parentElement.classList.toggle('collapsed', ui.collapsed[d]);
+  });
+  updateCapSelection();
+  return wrap;
+}
+
+function capItemHtml(fieldId, id, name, domainId) {
+  return '<label class="cap-item" data-domain="' + domainId + '" data-cap="' + id + '">' +
+    '<input type="checkbox" value="' + id + '" onchange="toggleCapability(\'' + fieldId + '\', \'' + id + '\', this.checked)">' +
+    '<span class="cap-id">' + id + '</span><span>' + escapeHtml(name) + '</span></label>';
+}
+
+function updateCapSelection() {
+  const app = getCurrentApp();
+  const selected = (app.data.capabilities || []).slice();
+  const box = document.getElementById('capSelected');
+  if (box) {
+    box.innerHTML = selected.length
+      ? selected.map(function (id) { const c = findCapability(id); return '<span class="tag">' + id + ' ' + escapeHtml(c ? c.name : '') + '</span>'; }).join('')
+      : '<span class="status-bar">Noch keine Capability gewählt.</span>';
+  }
+  const count = document.getElementById('capCount');
+  if (count) { count.textContent = selected.length + ' gewählt'; }
+}
+
+function applyCapFilter() {
+  const term = ui.capSearch.toLowerCase();
+  const items = document.querySelectorAll('#capPicker .cap-item');
+  items.forEach(function (el) {
+    const text = el.textContent.toLowerCase();
+    const id = el.dataset.cap;
+    const app = getCurrentApp();
+    const isSelected = (app.data.capabilities || []).indexOf(id) >= 0;
+    let show = !term || text.indexOf(term) >= 0;
+    if (show && ui.capOnlySelected) { show = isSelected; }
+    el.style.display = show ? '' : 'none';
+  });
+  const groups = document.querySelectorAll('#capPicker .cap-group');
+  groups.forEach(function (g) {
+    const visible = Array.prototype.some.call(g.querySelectorAll('.cap-item'), function (i) { return i.style.display !== 'none'; });
+    g.style.display = visible ? '' : 'none';
+  });
+  const domains = document.querySelectorAll('#capPicker .cap-domain');
+  domains.forEach(function (d) {
+    const visible = Array.prototype.some.call(d.querySelectorAll('.cap-item'), function (i) { return i.style.display !== 'none'; });
+    d.style.display = visible ? '' : 'none';
+  });
+}
+
+function renderField(field, value) {
+  let html = '<label>' + field.label + '</label>';
+  if (field.hint) { html += '<span class="hint">' + field.hint + '</span>'; }
+  switch (field.type) {
+    case 'text':
+      html += '<input type="text" value="' + escapeHtml(value || '') + '" data-field="' + field.id + '" onchange="updateField(this)">';
+      break;
+    case 'date':
+      html += '<input type="date" value="' + escapeHtml(value || '') + '" data-field="' + field.id + '" onchange="updateField(this)">';
+      break;
+    case 'number':
+      html += '<input type="number" value="' + escapeHtml(value || '') + '" data-field="' + field.id + '" onchange="updateField(this)">';
+      break;
+    case 'textarea':
+      html += '<textarea data-field="' + field.id + '" onchange="updateField(this)">' + escapeHtml(value || '') + '</textarea>';
+      break;
+    case 'select':
+      html += '<select data-field="' + field.id + '" onchange="updateField(this)"><option value="">– bitte wählen –</option>';
+      field.options.forEach(function (opt) {
+        html += '<option value="' + escapeHtml(opt) + '"' + (value === opt ? ' selected' : '') + '>' + escapeHtml(opt) + '</option>';
+      });
+      html += '</select>';
+      break;
+    case 'multiselect':
+      html += '<div class="checkbox-group">';
+      field.options.forEach(function (opt) {
+        const checked = (value || []).indexOf(opt) >= 0 ? ' checked' : '';
+        html += '<label><input type="checkbox"' + checked + ' value="' + escapeHtml(opt) + '" data-field="' + field.id + '" onchange="updateMultiSelect(this)"> ' + escapeHtml(opt) + '</label>';
+      });
+      html += '</div>';
+      break;
+    case 'list':
+      html += renderListInput(field, value);
+      break;
+    case 'objectlist':
+      html += renderObjectList(field, value);
+      break;
+    case 'scale':
+      html += renderScale(field, value);
+      break;
+    default:
+      html += '';
+  }
+  return html;
+}
+
+function renderListInput(field, value) {
+  const items = value || [];
+  let html = '<div class="list-input"><input type="text" id="list-input-' + field.id + '" placeholder="Neuer Eintrag" onkeydown="if(event.key===\'Enter\'){addListItem(\'' + field.id + '\');event.preventDefault()}"><button type="button" class="btn btn-secondary" onclick="addListItem(\'' + field.id + '\')">Hinzufügen</button></div>';
+  if (field.suggestions && field.suggestions.length) {
+    html += '<div class="suggest">';
+    field.suggestions.forEach(function (s) {
+      html += '<button type="button" onclick="addListItemValue(\'' + field.id + '\', \'' + s.replace(/'/g, '') + '\')">+ ' + escapeHtml(s) + '</button>';
+    });
+    html += '</div>';
+  }
+  html += '<div class="list-items" id="list-items-' + field.id + '">';
+  items.forEach(function (item, idx) {
+    html += '<span class="tag">' + escapeHtml(item) + ' <span class="remove" onclick="removeListItem(\'' + field.id + '\', ' + idx + ')">×</span></span>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderObjectList(field, value) {
+  const rows = value || [];
+  let html = '<div class="object-list"><table><thead><tr>';
+  field.columns.forEach(function (col) { html += '<th>' + col.label + '</th>'; });
+  html += '<th></th></tr></thead><tbody>';
+  rows.forEach(function (row, ridx) {
+    html += '<tr>';
+    field.columns.forEach(function (col) {
+      html += '<td>' + renderObjectCell(field.id, col, row[col.id] || '', ridx) + '</td>';
+    });
+    html += '<td><button type="button" class="btn btn-danger btn-sm" onclick="removeObjectRow(\'' + field.id + '\', ' + ridx + ')">×</button></td></tr>';
+  });
+  html += '</tbody></table><button type="button" class="btn btn-secondary btn-sm" onclick="addObjectRow(\'' + field.id + '\')">+ Zeile hinzufügen</button></div>';
+  return html;
+}
+
+function renderObjectCell(fieldId, col, val, ridx) {
+  if (col.type === 'select') {
+    let html = '<select onchange="updateObjectCell(\'' + fieldId + '\', ' + ridx + ', \'' + col.id + '\', this.value)"><option value="">–</option>';
+    col.options.forEach(function (opt) {
+      html += '<option value="' + escapeHtml(opt) + '"' + (val === opt ? ' selected' : '') + '>' + escapeHtml(opt) + '</option>';
+    });
+    html += '</select>';
+    return html;
+  }
+  return '<input type="text" value="' + escapeHtml(val || '') + '" onchange="updateObjectCell(\'' + fieldId + '\', ' + ridx + ', \'' + col.id + '\', this.value)">';
+}
+
+function renderScale(field, value) {
+  const scale = SCALES[field.scale];
+  let html = '';
+  scale.forEach(function (item) {
+    const selected = String(value) === String(item.value) ? ' selected' : '';
+    html += '<div class="scale-option' + selected + '" onclick="setScale(\'' + field.id + '\', ' + item.value + ')">' +
+      '<span class="score">' + item.value + '</span><strong>' + item.label + '</strong>' +
+      '<span class="anchor">' + item.anchor + '</span></div>';
+  });
+  html += '<input type="hidden" data-field="' + field.id + '" value="' + escapeHtml(value || '') + '">';
+  return html;
+}
+
+function renderUebersicht() {
+  const view = document.getElementById('viewUebersicht');
+  if (!state.apps.length) { view.innerHTML = '<div class="card"><h2>Keine Anwendungen erfasst</h2><p class="intro">Legen Sie mit «Neue Anwendung» den ersten Erfassungsbogen an.</p></div>'; return; }
+  let sum = 0, done = 0, vital = 0, schmerz = 0, adapter = 0, prioritaetHoch = 0, invest = 0;
+  state.apps.forEach(function (app) {
+    const c = completeness(app);
+    sum += c.pct; if (c.pct === 100) { done++; }
+    if (String(app.data.kritikalitaet) === '4') { vital++; }
+    if (Number(app.data.schmerzpunkt) >= 4) { schmerz++; }
+    if (app.data.adapterKandidat === 'ja') { adapter++; }
+    if (app.data.prioritaet === 'hoch') { prioritaetHoch++; }
+    if (app.data.timeVorschlag === 'Invest' || app.data.timeVorschlag === 'Migrate') { invest++; }
+  });
+  const avg = Math.round(sum / state.apps.length);
+
+  let rows = state.apps.map(function (app) {
+    const c = completeness(app);
+    const caps = (app.data.capabilities || []).map(function (id) {
+      for (let i = 0; i < CATALOG.level1.length; i++) {
+        for (let j = 0; j < CATALOG.level1[i].level2.length; j++) {
+          const l2 = CATALOG.level1[i].level2[j];
+          if (l2.id === id) { return CATALOG.level1[i].id; }
+          for (let k = 0; k < l2.level3.length; k++) { if (l2.level3[k].id === id) { return CATALOG.level1[i].id; } }
+        }
+      }
+      return '';
+    }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; });
+    return {
+      id: app.id,
+      name: app.data.anwendungsname || 'Neue Anwendung',
+      art: app.data.anwendungsart || '',
+      bereiche: caps.join(', '),
+      krit: Number(app.data.kritikalitaet) || 0,
+      schmerz: Number(app.data.schmerzpunkt) || 0,
+      auto: app.data.automatisierungsgrad === '' || app.data.automatisierungsgrad === undefined ? -1 : Number(app.data.automatisierungsgrad),
+      time: app.data.timeVorschlag || '',
+      adapter: app.data.adapterKandidat || '',
+      prio: app.data.prioritaet || '',
+      pct: c.pct
+    };
+  });
+
+  if (ui.matrixSearch) {
+    const t = ui.matrixSearch.toLowerCase();
+    rows = rows.filter(function (r) { return (r.name + ' ' + r.art + ' ' + r.bereiche + ' ' + r.time).toLowerCase().indexOf(t) >= 0; });
+  }
+  if (ui.matrixFilter === 'unvollstaendig') { rows = rows.filter(function (r) { return r.pct < 100; }); }
+  if (ui.matrixFilter === 'vital') { rows = rows.filter(function (r) { return r.krit === 4; }); }
+  if (ui.matrixFilter === 'schmerz') { rows = rows.filter(function (r) { return r.schmerz >= 4; }); }
+  if (ui.matrixFilter === 'adapter') { rows = rows.filter(function (r) { return r.adapter === 'ja'; }); }
+  if (ui.matrixFilter === 'hoch') { rows = rows.filter(function (r) { return r.prio === 'hoch'; }); }
+
+  const key = ui.sortKey, dir = ui.sortDir;
+  rows.sort(function (a, b) {
+    let x = a[key], y = b[key];
+    if (typeof x === 'string') { return x.localeCompare(y) * dir; }
+    return (x - y) * dir;
+  });
+
+  const prioOrder = { 'hoch': 0, 'mittel': 1, 'tief': 2 };
+
+  let html = '<div class="kpis">' +
+    kpi(state.apps.length, 'Erfasste Anwendungen', '') +
+    kpi(avg + '%', 'Durchschnittliche Vollständigkeit', avg === 100 ? '' : 'warn') +
+    kpi(done, 'Vollständig erfasst', done === state.apps.length ? '' : 'warn') +
+    kpi(vital, 'Vital (Kritikalität 4)', vital ? 'danger' : '') +
+    kpi(schmerz, 'Schmerzpunkt 4 oder 5', schmerz ? 'warn' : '') +
+    kpi(adapter, 'Adapter-Kandidaten', 'gold') +
+    kpi(prioritaetHoch, 'Priorität hoch', 'gold') +
+    kpi(invest, 'TIME Invest oder Migrate', '') +
+    '</div>';
+
+  html += '<div class="card"><h2>Übersicht und Auswertung</h2><p class="intro">Alle Anwendungen mit den Kernaussagen der Bewertung. Zeile anklicken öffnet die Erfassung.</p>' +
+    '<div class="toolbar">' +
+      '<input type="search" placeholder="Anwendung, Capability oder TIME suchen" value="' + escapeHtml(ui.matrixSearch) + '" oninput="appActions.setMatrixSearch(this.value)">' +
+      '<select onchange="appActions.setMatrixFilter(this.value)">' +
+        opt('alle', 'Alle Anwendungen', ui.matrixFilter) + opt('unvollstaendig', 'Nur unvollständige', ui.matrixFilter) +
+        opt('vital', 'Nur Kritikalität 4', ui.matrixFilter) + opt('schmerz', 'Nur Schmerzpunkt 4/5', ui.matrixFilter) +
+        opt('adapter', 'Nur Adapter-Kandidaten', ui.matrixFilter) + opt('hoch', 'Nur Priorität hoch', ui.matrixFilter) +
+      '</select>' +
+      '<button class="btn btn-secondary" onclick="appActions.exportMatrixCsv()">Matrix als CSV</button>' +
+      '<span class="status-bar">' + rows.length + ' von ' + state.apps.length + ' Anwendungen</span>' +
+    '</div>';
+  html += '<div class="matrix-wrap"><table class="matrix"><thead><tr>' +
+    th('name', 'Anwendung') + th('art', 'Art') + th('bereiche', 'Capability-Domänen') + th('krit', 'Kritikalität') +
+    th('schmerz', 'Schmerzpunkt') + th('auto', 'Automatisierung') + th('time', 'TIME') + th('adapter', 'Adapter') +
+    th('prio', 'Priorität') + th('pct', 'Vollständigkeit') +
+    '</tr></thead><tbody>';
+  if (!rows.length) { html += '<tr><td colspan="10" class="status-bar">Keine Anwendung entspricht dem Filter.</td></tr>'; }
+  rows.forEach(function (r) {
+    html += '<tr onclick="appActions.selectApp(\'' + r.id + '\')">' +
+      '<td><strong>' + escapeHtml(r.name) + '</strong></td>' +
+      '<td>' + escapeHtml(r.art) + '</td>' +
+      '<td>' + escapeHtml(r.bereiche) + '</td>' +
+      '<td>' + (r.krit ? '<span class="pill k' + r.krit + '">' + r.krit + '</span>' : '–') + '</td>' +
+      '<td>' + (r.schmerz ? '<span class="pill k' + (r.schmerz >= 4 ? 4 : 2) + '">' + r.schmerz + '</span>' : '–') + '</td>' +
+      '<td>' + (r.auto >= 0 ? r.auto : '–') + '</td>' +
+      '<td>' + (r.time ? '<span class="pill time-' + r.time.toLowerCase() + '">' + escapeHtml(r.time) + '</span>' : '–') + '</td>' +
+      '<td>' + escapeHtml(r.adapter) + '</td>' +
+      '<td>' + (r.prio ? '<span class="pill prio-' + r.prio + '">' + escapeHtml(r.prio) + '</span>' : '–') + '</td>' +
+      '<td><div class="bar"><span style="width:' + r.pct + '%"></span></div><span class="status-bar">' + r.pct + '%</span></td>' +
+    '</tr>';
+  });
+  html += '</tbody></table></div></div>';
+
+  html += '<div class="card"><h2>Wie weiter</h2><p class="intro">Empfohlener Ablauf der IST-Aufnahme im Neuhaus.</p><ol style="margin:0;padding-left:1.2rem;font-size:0.92rem;">' +
+    '<li>Pro Anwendung einen Bogen anlegen (oder einen bestehenden duplizieren) und die Abschnitte 1 bis 9 durchgehen.</li>' +
+    '<li>Capabilities auf der tiefsten zutreffenden Stufe wählen; die Übersicht gruppiert danach automatisch.</li>' +
+    '<li>Bewertung in Abschnitt 8, Risiken und Nachfolge in Abschnitt 9 festhalten.</li>' +
+    '<li>Stand mit «Speichern» als JSON sichern und mit «Drucken / PDF» als Bericht ablegen.</li>' +
+    '<li>Die Matrix nach Kritikalität und Priorität sortieren und daraus die Massnahmenliste für die Geschäftsleitung ableiten.</li>' +
+    '</ol></div>';
+
+  view.innerHTML = html;
+}
+
+function kpi(val, lbl, cls) {
+  return '<div class="kpi ' + (cls || '') + '"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
+}
+function opt(value, label, current) {
+  return '<option value="' + value + '"' + (current === value ? ' selected' : '') + '>' + label + '</option>';
+}
+function th(key, label) {
+  const arrow = ui.sortKey === key ? (ui.sortDir === 1 ? ' ▲' : ' ▼') : '';
+  return '<th onclick="appActions.setSort(\'' + key + '\')">' + label + arrow + '</th>';
+}
+
+function updateField(el) {
+  const app = getCurrentApp();
+  app.data[el.dataset.field] = el.value;
+  save();
+  renderAppList();
+  renderSectionNav();
+  updateStatus();
+}
+
+function updateMultiSelect(el) {
+  const fieldId = el.dataset.field;
+  const app = getCurrentApp();
+  const checked = Array.prototype.filter.call(document.querySelectorAll('[data-field="' + fieldId + '"]'), function (cb) { return cb.checked; }).map(function (cb) { return cb.value; });
+  app.data[fieldId] = checked;
+  save();
+  renderSectionNav();
+  updateStatus();
+}
+
+function addListItem(fieldId) {
+  const input = document.getElementById('list-input-' + fieldId);
+  if (!input) { return; }
+  const val = input.value.trim();
+  if (!val) { return; }
+  addListItemValue(fieldId, val);
+  input.value = '';
+  input.focus();
+}
+
+function addListItemValue(fieldId, val) {
+  const app = getCurrentApp();
+  app.data[fieldId] = app.data[fieldId] || [];
+  if (app.data[fieldId].indexOf(val) < 0) { app.data[fieldId].push(val); }
+  save();
+  renderSection();
+  renderSectionNav();
+  updateStatus();
+}
+
+function removeListItem(fieldId, idx) {
+  const app = getCurrentApp();
+  app.data[fieldId].splice(idx, 1);
+  save();
+  renderSection();
+  renderSectionNav();
+  updateStatus();
+}
+
+function addObjectRow(fieldId) {
+  const app = getCurrentApp();
+  app.data[fieldId] = app.data[fieldId] || [];
+  const field = findField(fieldId);
+  const row = {};
+  field.columns.forEach(function (col) { row[col.id] = ''; });
+  app.data[fieldId].push(row);
+  save();
+  renderSection();
+  renderSectionNav();
+  updateStatus();
+}
+
+function removeObjectRow(fieldId, idx) {
+  const app = getCurrentApp();
+  app.data[fieldId].splice(idx, 1);
+  save();
+  renderSection();
+  renderSectionNav();
+  updateStatus();
+}
+
+function updateObjectCell(fieldId, ridx, colId, val) {
+  const app = getCurrentApp();
+  app.data[fieldId][ridx][colId] = val;
+  save();
+  renderSectionNav();
+  updateStatus();
+}
+
+function setScale(fieldId, value) {
+  const app = getCurrentApp();
+  app.data[fieldId] = String(value);
+  save();
+  renderSection();
+  renderSectionNav();
+  updateStatus();
+}
+
+function toggleCapability(fieldId, id, checked) {
+  const app = getCurrentApp();
+  app.data[fieldId] = app.data[fieldId] || [];
+  if (checked) {
+    if (app.data[fieldId].indexOf(id) < 0) { app.data[fieldId].push(id); }
+  } else {
+    app.data[fieldId] = app.data[fieldId].filter(function (x) { return x !== id; });
+  }
+  save();
+  updateCapSelection();
+  renderAppList();
+  renderSectionNav();
+  updateStatus();
+}
+
+function findCapability(id) {
+  for (let i = 0; i < CATALOG.level1.length; i++) {
+    const l1 = CATALOG.level1[i];
+    for (let j = 0; j < l1.level2.length; j++) {
+      const l2 = l1.level2[j];
+      if (l2.id === id) { return l2; }
+      for (let k = 0; k < l2.level3.length; k++) { if (l2.level3[k].id === id) { return l2.level3[k]; } }
+    }
+  }
+  return null;
+}
+
+function findField(id) {
+  for (let i = 0; i < SCHEMA.length; i++) {
+    for (let j = 0; j < SCHEMA[i].fields.length; j++) {
+      if (SCHEMA[i].fields[j].id === id) { return SCHEMA[i].fields[j]; }
+    }
+  }
+  return null;
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) { return ''; }
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function updateStatus() {
+  const app = getCurrentApp();
+  const bar = document.getElementById('statusBar');
+  const pb = document.getElementById('progressBar');
+  if (!app) { return; }
+  const c = completeness(app);
+  const total = completeness({ data: {} });
+  if (bar) { bar.textContent = c.filled + ' von ' + c.total + ' Pflichtfeldern ausgefüllt (' + c.pct + ' %) · ' + app.meta.catalogVersion; }
+  if (pb) { pb.style.width = c.pct + '%'; }
+}
+
+const appActions = {
+  setView: function (v) { state.view = v; render(); },
+  newApp: function () { createApp(); state.view = 'erfassung'; render(); save(); },
+  duplicateApp: function () {
+    const cur = getCurrentApp();
+    if (!cur) { return; }
+    const copy = createApp(cur);
+    copy.data.anwendungsname = (cur.data.anwendungsname || 'Anwendung') + ' (Kopie)';
+    copy.data.erhebungsdatum = new Date().toISOString().slice(0, 10);
+    state.view = 'erfassung';
+    render(); save();
+  },
+  selectApp: function (id) { state.currentAppId = id; state.currentSection = 0; state.view = 'erfassung'; render(); },
+  deleteApp: function (e, id) {
+    e.stopPropagation();
+    if (state.apps.length <= 1) { alert('Mindestens eine Anwendung muss erhalten bleiben.'); return; }
+    if (!confirm('Anwendung wirklich löschen? Die erfassten Angaben gehen verloren.')) { return; }
+    state.apps = state.apps.filter(function (a) { return a.id !== id; });
+    if (state.currentAppId === id) { state.currentAppId = state.apps[0].id; }
+    render(); save();
+  },
+  nextSection: function () { if (state.currentSection < SCHEMA.length - 1) { state.currentSection++; render(); } },
+  prevSection: function () { if (state.currentSection > 0) { state.currentSection--; render(); } },
+  filterCaps: function (value) { ui.capSearch = value; applyCapFilter(); },
+  toggleOnlySelected: function (checked) { ui.capOnlySelected = checked; applyCapFilter(); },
+  setMatrixSearch: function (value) { ui.matrixSearch = value; const el = event.target; renderUebersicht(); const input = document.querySelector('#viewUebersicht input[type="search"]'); if (input) { input.focus(); input.setSelectionRange(el.value.length, el.value.length); } },
+  setMatrixFilter: function (value) { ui.matrixFilter = value; renderUebersicht(); },
+  setSort: function (key) { if (ui.sortKey === key) { ui.sortDir = -ui.sortDir; } else { ui.sortKey = key; ui.sortDir = 1; } renderUebersicht(); },
+  saveToFile: function () {
+    const payload = { meta: { exported: new Date().toISOString(), catalogVersion: CATALOG.version, formVersion: FORM_VERSION, organisation: CATALOG.organisation }, state: state };
+    download('ist-aufnahme-neuhaus-stand.json', JSON.stringify(payload, null, 2), 'application/json');
+  },
+  exportJson: function () {
+    const payload = { meta: { exported: new Date().toISOString(), catalogVersion: CATALOG.version, formVersion: FORM_VERSION, organisation: CATALOG.organisation }, apps: state.apps };
+    download('ist-aufnahme-neuhaus-export.json', JSON.stringify(payload, null, 2), 'application/json');
+  },
+  loadFromFile: function (event) {
+    const file = event.target.files[0];
+    if (!file) { return; }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const loaded = parsed.state || parsed;
+        if (!loaded.apps || !Array.isArray(loaded.apps)) { throw new Error('Ungültiges Format'); }
+        state.apps = loaded.apps;
+        state.currentAppId = loaded.currentAppId || loaded.apps[0].id;
+        state.currentSection = 0;
+        save(); render();
+      } catch (err) { alert('Fehler beim Laden: ' + err.message); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  },
+  exportCsv: function () {
+    const headers = ['id', 'anwendungsname'];
+    SCHEMA.forEach(function (section) {
+      section.fields.forEach(function (field) {
+        if (field.type === 'objectlist') {
+          field.columns.forEach(function (col) { headers.push(field.id + '_' + col.id); });
+        } else {
+          headers.push(field.id);
+        }
+      });
+    });
+    const rows = [headers.join(';')];
+    state.apps.forEach(function (app) {
+      const cells = [app.id, app.data.anwendungsname || ''];
+      SCHEMA.forEach(function (section) {
+        section.fields.forEach(function (field) {
+          if (field.type === 'objectlist') {
+            const arr = app.data[field.id] || [];
+            field.columns.forEach(function (col) {
+              cells.push('"' + arr.map(function (r) { return r[col.id] || ''; }).join(', ').replace(/"/g, '""') + '"');
+            });
+          } else {
+            let val = app.data[field.id] || '';
+            if (Array.isArray(val)) { val = val.join(', '); }
+            cells.push('"' + String(val).replace(/"/g, '""') + '"');
+          }
+        });
+      });
+      rows.push(cells.join(';'));
+    });
+    download('ist-aufnahme-neuhaus-export.csv', rows.join('\n'), 'text/csv;charset=utf-8;');
+  },
+  exportMatrixCsv: function () {
+    const headers = ['Anwendung', 'Art', 'Capability-Domaenen', 'Kritikalitaet', 'Schmerzpunkt', 'Automatisierung', 'TIME', 'Adapter', 'Prioritaet', 'Vollstaendigkeit'];
+    const rows = [headers.join(';')];
+    state.apps.forEach(function (app) {
+      const c = completeness(app);
+      rows.push(['"' + (app.data.anwendungsname || '') + '"', '"' + (app.data.anwendungsart || '') + '"', (app.data.capabilities || []).length,
+        app.data.kritikalitaet || '', app.data.schmerzpunkt || '', app.data.automatisierungsgrad || '',
+        app.data.timeVorschlag || '', app.data.adapterKandidat || '', app.data.prioritaet || '', c.pct + '%'].join(';'));
+    });
+    download('ist-aufnahme-neuhaus-matrix.csv', rows.join('\n'), 'text/csv;charset=utf-8;');
+  },
+  printReport: function () {
+    const app = getCurrentApp();
+    if (!app) { return; }
+    const c = completeness(app);
+    let html = '<h1 style="font-size:16pt;">IST-Aufnahme der Anwendungen – ' + escapeHtml(app.data.anwendungsname || 'Neue Anwendung') + '</h1>' +
+      '<p style="font-size:10pt;">Stiftung Neuhaus, Wohn- und Pflegezentrum Wängi · Katalog ' + CATALOG.version + ' · Vollständigkeit ' + c.pct + ' % (' + c.filled + ' von ' + c.total + ' Pflichtfeldern) · gedruckt am ' + new Date().toLocaleDateString('de-CH') + '</p>';
+    SCHEMA.forEach(function (section) {
+      html += '<div class="print-section"><h3>' + section.title + '</h3>';
+      section.fields.forEach(function (field) {
+        const val = app.data[field.id];
+        let text = '';
+        if (Array.isArray(val)) {
+          if (field.type === 'objectlist') {
+            text = val.map(function (r) {
+              return field.columns.map(function (col) { return col.label + ': ' + (r[col.id] || '–'); }).join(' | ');
+            }).join('\n');
+          } else {
+            text = val.map(function (id) {
+              const cap = field.type === 'capability' ? findCapability(id) : null;
+              return cap ? id + ' ' + cap.name : id;
+            }).join(', ');
+          }
+        } else if (field.type === 'scale' && val) {
+          const sc = SCALES[field.scale];
+          const hit = sc.filter(function (s) { return String(s.value) === String(val); })[0];
+          text = val + ' – ' + (hit ? hit.label : '');
+        } else { text = val || ''; }
+        html += '<div class="print-row"><div class="k">' + field.label + '</div><div class="v">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div></div>';
+      });
+      html += '</div>';
+    });
+    document.getElementById('printReport').innerHTML = html;
+    window.print();
+  }
+};
+
+function download(filename, content, type) {
+  const blob = new Blob([content], { type: type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
