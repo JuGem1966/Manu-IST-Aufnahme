@@ -257,9 +257,9 @@
    unter Synchronisation eingegeben und bleibt im Browser.
    ============================================================ */
 var DEPLOY_DEFAULTS = {
-  "owner": "stiftung-neuhaus",
-  "repo": "ist-aufnahme-daten",
-  "folder": "daten",
+  "owner": "JuGem1966",
+  "repo": "Manu-IST-Aufnahme-Daten",
+  "folder": "Daten",
   "branch": "main",
   "apiBase": "https://api.github.com"
 };
@@ -809,7 +809,7 @@ var DEPLOY_DEFAULTS = {
   var SYNC_KEY = 'ist-aufnahme-neuhaus-sync-v1';
   var DEMO_KEY = 'ist-aufnahme-neuhaus-demostore-v1';
   var PENDING = 'ausstehend';
-  var AUTO_DELAY = 2500;
+  var AUTO_DELAY = 8000;
 
   /* Vorgabewerte aus dem Build. Sie stehen im HTML-Datei im Block
      KONFIGURATION ganz oben und lassen sich dort ohne Programmierkenntnisse
@@ -844,7 +844,7 @@ var DEPLOY_DEFAULTS = {
     busyAction: ''
   };
 
-  var runtime = { demoFetch: null, timer: null, mounted: false };
+  var runtime = { demoFetch: null, timer: null, mounted: false, running: false, again: false };
 
   /* ---------------- Zustand ---------------- */
 
@@ -1075,6 +1075,14 @@ var DEPLOY_DEFAULTS = {
         syncState.pushedAt[id] = remoteChanged || new Date().toISOString();
         log('Neu uebernommen: ' + appName(remoteApp), 'ok');
       } else if (remoteChanged && remoteChanged > localChanged) {
+        if (isDirty(local)) {
+          /* Die eigene Fassung ist noch nicht im Repository. Sie darf nicht
+             durch die dort liegende Fassung ersetzt werden - sonst
+             verschwinden gerade erfasste Angaben. */
+          syncState.conflicts[id] = { at: new Date().toISOString(), message: 'Lokale Aenderungen sind noch nicht hochgeladen; die Fassung im Repository ist neuer.' };
+          log('Nicht ueberschrieben: ' + appName(local) + ' hat noch nicht hochgeladene Aenderungen - lokale Fassung bleibt erhalten.', 'warn');
+          return;
+        }
         var wasName = appName(local);
         remoteApp.id = id;
         var idx = state.apps.indexOf(local);
@@ -1094,6 +1102,12 @@ var DEPLOY_DEFAULTS = {
       log('Bitte zuerst die Verbindung pruefen.', 'warn');
       render(); return Promise.resolve();
     }
+    if (runtime.running) {
+      runtime.again = true;
+      log('Synchronisation laeuft bereits - der naechste Durchgang folgt danach.', 'info');
+      return Promise.resolve();
+    }
+    runtime.running = true;
     syncState.busy = true; syncState.busyAction = 'sync';
     log('Synchronisation gestartet (' + state.apps.length + ' Anwendung(en)).', 'info');
     render();
@@ -1124,6 +1138,16 @@ var DEPLOY_DEFAULTS = {
         render(); saveState();
         if (window.render) { window.render(); }
       });
+    }).catch(function (err) {
+      syncState.busy = false; syncState.busyAction = '';
+      log('Synchronisation abgebrochen: ' + ((err && err.message) || err), 'bad');
+      render();
+    }).then(function () {
+      runtime.running = false;
+      if (runtime.again) {
+        runtime.again = false;
+        runtime.timer = setTimeout(function () { syncAll(); }, 5000);
+      }
     });
   }
 
@@ -1307,7 +1331,18 @@ var DEPLOY_DEFAULTS = {
   function scheduleAutoSync() {
     if (!syncState.configured || !syncState.auto) { refreshPill(); return; }
     clearTimeout(runtime.timer);
-    runtime.timer = setTimeout(function () { syncAll(); }, AUTO_DELAY);
+    var offen = state.apps.filter(isDirty).length;
+    var warten = AUTO_DELAY;
+    if (!offen) {
+      /* Nichts offen: nur gelegentlich nachsehen, ob jemand anderes etwas
+         geaendert hat. Schont Schnittstelle und Kontingent. */
+      var seit = syncState.lastSync ? (Date.now() - new Date(syncState.lastSync).getTime()) : Infinity;
+      if (seit < 60000) { refreshPill(); return; }
+      warten = 1000;
+    }
+    runtime.timer = setTimeout(function () {
+      if (runtime.running) { runtime.again = true; } else { syncAll(); }
+    }, warten);
     refreshPill();
   }
 
@@ -2005,9 +2040,14 @@ function getCurrentApp() {
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  /* Reihenfolge ist wichtig: erst den Änderungszeitstempel setzen, dann
+     schreiben. Sonst liegt im Speicher dauerhaft ein Zeitstempel, der einen
+     Speichervorgang zu alt ist - und der Abgleich hält die eigene Fassung
+     für veraltet. */
   const app = getCurrentApp();
   if (app) { app.meta.lastSaved = new Date().toISOString(); app.meta.localChange = app.meta.lastSaved; }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { console.error('Speichern im Browser fehlgeschlagen', e); }
   const bar = document.getElementById('statusBar');
   if (bar) { bar.textContent = 'Automatisch gespeichert um ' + new Date().toLocaleTimeString('de-CH'); }
   if (window.SyncUI && window.SyncUI.scheduleAutoSync) { window.SyncUI.scheduleAutoSync(); }
@@ -2015,8 +2055,11 @@ function save() {
 
 function setupAutosave() {
   const area = document.getElementById('formArea');
-  area.addEventListener('change', save, true);
-  area.addEventListener('input', function () {
+  function istNurSuche(el) { return el && (el.id === 'capSearch' || el.id === 'capOnlySelected'); }
+  area.addEventListener('change', function (e) { if (istNurSuche(e.target)) { return; } save(); }, true);
+  area.addEventListener('input', function (e) {
+    /* Tippen im Suchfeld des Capability-Pickers ist keine Datenänderung. */
+    if (istNurSuche(e.target)) { return; }
     clearTimeout(window._saveTimeout);
     window._saveTimeout = setTimeout(save, 900);
   }, true);
@@ -2201,8 +2244,14 @@ function buildCapabilityBlock(field, errors) {
 }
 
 function capItemHtml(fieldId, id, name, domainId) {
-  return '<label class="cap-item" data-domain="' + domainId + '" data-cap="' + id + '">' +
-    '<input type="checkbox" value="' + id + '" onchange="toggleCapability(\'' + fieldId + '\', \'' + id + '\', this.checked)">' +
+  /* Kästchenzustand kommt aus den Daten - sonst steht nach jedem Neuzeichnen
+     alles auf "nicht gewählt", obwohl die Auswahl vorhanden ist. */
+  const app = getCurrentApp();
+  const liste = (app && app.data && Array.isArray(app.data[fieldId])) ? app.data[fieldId] : [];
+  const gewaehlt = liste.indexOf(id) >= 0;
+  return '<label class="cap-item' + (gewaehlt ? ' is-selected' : '') + '" data-domain="' + domainId + '" data-cap="' + id + '">' +
+    '<input type="checkbox" value="' + id + '"' + (gewaehlt ? ' checked' : '') +
+    ' onchange="toggleCapability(&quot;' + fieldId + '&quot;, &quot;' + id + '&quot;, this.checked)">' +
     '<span class="cap-id">' + id + '</span><span>' + escapeHtml(name) + '</span></label>';
 }
 
@@ -2217,6 +2266,15 @@ function updateCapSelection() {
   }
   const count = document.getElementById('capCount');
   if (count) { count.textContent = selected.length + ' gewählt'; }
+  /* Kästchen und Markierung mit den Daten abgleichen - auch wenn die Auswahl
+     von aussen kommt (Synchronisation, Datei laden). */
+  const eintraege = document.querySelectorAll('#capPicker .cap-item');
+  Array.prototype.forEach.call(eintraege, function (el) {
+    const an = selected.indexOf(el.dataset.cap) >= 0;
+    const box = el.querySelector('input[type="checkbox"]');
+    if (box && box.checked !== an) { box.checked = an; }
+    el.classList.toggle('is-selected', an);
+  });
 }
 
 function applyCapFilter() {
