@@ -844,7 +844,7 @@ var DEPLOY_DEFAULTS = {
     busyAction: ''
   };
 
-  var runtime = { demoFetch: null, timer: null, mounted: false, running: false, again: false };
+  var runtime = { demoFetch: null, timer: null, mounted: false, running: false, again: false, changed: false };
 
   /* ---------------- Zustand ---------------- */
 
@@ -1072,6 +1072,7 @@ var DEPLOY_DEFAULTS = {
       if (!local) {
         remoteApp.id = id;
         state.apps.push(remoteApp);
+        runtime.changed = true;
         syncState.pushedAt[id] = remoteChanged || new Date().toISOString();
         log('Neu uebernommen: ' + appName(remoteApp), 'ok');
       } else if (remoteChanged && remoteChanged > localChanged) {
@@ -1087,6 +1088,7 @@ var DEPLOY_DEFAULTS = {
         remoteApp.id = id;
         var idx = state.apps.indexOf(local);
         state.apps[idx] = remoteApp;
+        runtime.changed = true;
         syncState.pushedAt[id] = remoteChanged;
         delete syncState.conflicts[id];
         log('Fremde Fassung uebernommen: ' + wasName, 'ok');
@@ -1136,7 +1138,13 @@ var DEPLOY_DEFAULTS = {
         log(msg, konf ? 'warn' : 'ok');
         syncState.busy = false; syncState.busyAction = '';
         render(); saveState();
-        if (window.render) { window.render(); }
+        /* Nur neu zeichnen, wenn der Abgleich wirklich etwas geaendert hat.
+           Sonst baut sich die Erfassung bei jeder Hintergrundsynchronisation
+           neu auf - die Liste springt und die Auswahl flackert. */
+        if (runtime.changed) {
+          runtime.changed = false;
+          if (window.render) { window.render(); }
+        }
       });
     }).catch(function (err) {
       syncState.busy = false; syncState.busyAction = '';
@@ -2164,6 +2172,12 @@ function renderSection() {
   const section = SCHEMA[state.currentSection];
   const errors = validateSection(section, app);
   const formArea = document.getElementById('formArea');
+  /* Scrollstellungen merken. Ohne diese Rettung springt die Capability-Liste
+     nach jedem Neuzeichnen - also auch nach jeder Hintergrundsynchronisation -
+     an den Anfang zurueck. */
+  const altesFeld = document.getElementById('capPicker');
+  const listeScroll = altesFeld ? altesFeld.scrollTop : 0;
+  const seiteScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
   formArea.innerHTML = '';
 
   const card = document.createElement('div');
@@ -2200,6 +2214,13 @@ function renderSection() {
     const input = document.getElementById('capSearch');
     if (input) { input.value = ui.capSearch; applyCapFilter(); }
   }
+  /* Erst hier, nach dem Einhaengen ins Dokument, Auswahl, Zaehler und Haken
+     aufbauen. Vorher haengt der Block noch lose und getElementById findet
+     nichts - die Liste der gewaehlten Faehigkeiten bliebe leer. */
+  updateCapSelection();
+  const neuesFeld = document.getElementById('capPicker');
+  if (neuesFeld && listeScroll) { neuesFeld.scrollTop = listeScroll; }
+  if (seiteScroll) { window.scrollTo(0, seiteScroll); }
   updateStatus();
 }
 
@@ -2817,5 +2838,6 @@ function download(filename, content, type) {
 
 window.addEventListener('DOMContentLoaded', init);
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
